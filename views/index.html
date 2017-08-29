@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
+  <link rel="stylesheet" type="text/css" href="scripts/main.css">
+  <title>Kopitiam</title>
+</head>
+
+<body>
+<button class="ui button" onclick="back()">Back</button>
+<div id="tablenum" class="layout">
+  <div class="ui segment three blue buttons grid">
+    <button v-for="number in tablenumber" v-on:click="selectnumber(number)" class="ui button">{{number}}</button>
+  </div>
+</div>
+
+<div id="extraorder" class="ui segment layout">
+  <div class="header">
+    {{ itemlink.name }} RM {{ (itemlink.price + addprice).toFixed(2) }}
+    <button v-on:click="order()" class="ui button right floated">Add</button>
+  </div>
+  <div class="ui equal width column grid">
+    <div class="ui fluid action input row">
+        <input v-model="remarktext" placeholder="remarks..." type="text">
+        <div v-on:click="addremark(remarktext)" class="ui button">add remarks</div>
+    </div> 
+    <div class="row">
+      <h3 class="ui header column">Remarks:</h3>
+      <h3 class="ui header column">Extra:</h3>
+    </div>
+
+  </div>
+  <div class="ui equal width column grid">
+    <div class="row">
+      <div class="ui column relaxed divided list">
+        <div v-for="(remark, index) in menudatalink.remarks" class="ui checkbox item">
+          <input v-model="remarks" v-bind:value="remark.text" v-bind:id="'remark-'+index" type="checkbox">
+          <label v-bind:for="'remark-'+index" class="ui fluid">{{ remark.text }}</label>
+        </div>
+      </div>
+      <div class="ui column relaxed divided list">
+        <div v-for="(extra, index) in menudatalink.extra" class="ui checkbox item">
+          <input v-model="extraindex" v-bind:value="index" v-bind:id="'extra-'+index" type="checkbox">
+          <label v-bind:for="'extra-'+index" class="ui fluid">{{ extra.text }}
+            <a>+RM {{ extra.price.toFixed(2) }}</a>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="checkorder" class="ui segment layout">
+  <div class="header fluid">Ordered List:
+    <a class="right floated">RM{{ order_list.totalprice.toFixed(2) }}</a>
+    <div onclick="sendorder()" class="ui green button right floated">Send</div>
+  </div>
+  
+  <div class="ui middle aligned grid divided list">
+    <div v-for="(order, index) in order_list.items" class="ui item row">
+      <div class="four wide column">
+        {{ order.name }}
+      </div>
+      <div class="six wide column">
+        <label v-for="remark in order.remarks">{{ remark }} ; </label>
+        <label v-for="extra in order.extra">{{ extra.text }} ; </label>
+      </div>
+      <label class="two wide column">RM {{ order.price.toFixed(2) }}</label>
+      <div v-on:click="cancel(order)" class="column ui red button">Cancel</div>
+    </div>
+    </div>
+  </div>
+
+<div id="menu" class="ui segment container cover layout">
+  <div class="ui huge menu">
+    <a v-for="category in menudatalink.menu" v-bind:data-tab="'cat'+category.id" class="item">{{ category.name }}</a>
+    <a data-tab="ordercheck" onclick="toggleto('#menu','#checkorder')" class="item right">Check</a>
+  </div>
+
+  <div v-for="category in menudatalink.menu" v-bind:data-tab="'cat'+category.id" class="ui tab segment six column grid">
+    <div id="menu_item" v-for="item in category.items" class="ui labeled button four wide">
+      <div v-on:click="order(item)" class="ui button">
+        {{ item.name }} <br> RM {{ Number(item.price).toFixed(2) }}
+      </div>
+      <a v-on:click="extra(item)" class="ui basic left pointing label">+
+        <a class="ui basic left label">{{ item.count }}</a>
+      </a>
+    </div>
+  <div>
+</div>
+
+<script src="include/jquery-3.2.1.min.js"></script>
+<script src="include/vue.min.js"></script>
+<script src="include/semantic.min.js"></script>
+<script src="scripts/main.js"></script>
+</body>
+</html>
+

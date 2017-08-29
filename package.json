@@ -1,0 +1,15 @@
+{
+  "name": "kopitiam",
+  "version": "1.0.0",
+  "description": "a project create for my dad",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "cheng1999",
+  "license": "ISC",
+  "dependencies": {
+    "lokijs": "^1.5.0",
+    "nedb": "^1.8.0"
+  }
+}

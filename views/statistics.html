@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
+  <link rel="stylesheet" type="text/css" href="include/calendar.min.css">
+  <link rel="stylesheet" type="text/css" href="scripts/statistics.css">
+  <title>Kopitiam</title>
+</head>
+
+<body class="ui segment">
+
+  <div class="ui input calendar" id="startdate">
+    <input type="text" placeholder="Date/Time">
+  </div>
+  <label>to</label>
+  <div class="ui input calendar" id="enddate">
+    <input type="text" placeholder="Date/Time">
+  </div>
+  <label>Period:</label>
+  <select id="periodlist" class="ui dropdown">
+    <!-- value is in unit minute !-->
+    <option value="30">30 Minutes</option>
+    <option value="60">1 Hour</option>
+    <option value="120">2 Hour</option>
+    <option value="360">6 Hour</option>
+    <option value="720">12 Hour</option>
+    <option value="1440">Day</option>
+    <option value="10080">Weeks</option>
+    <option value="43800">Month</option>
+  </select>
+  <br>
+  <label>Categories:</label>
+  <div id="selectcategories" class="ui fluid multiple search selection dropdown">
+    <input name="tags" type="hidden">
+    <i class="dropdown icon"></i>
+    <div class="default text">Categories</div>
+    <div class="menu">
+      <div v-on:click="" class="item" data-value="">all</div>
+      <div v-for="category in menu" v-bind:data-value="category.id" class="item">{{ category.name }}</div>
+    </div>
+  </div>  
+  <div onclick="loaddata()" class="ui button">Load</div>
+  <br>
+  <canvas id="chartJSContainer" width="600" height="400"></canvas>
+  <canvas id="myChart" width="400" height="400"></canvas>
+
+<script src="include/jquery-3.2.1.min.js"></script>
+<script src="include/vue.min.js"></script>
+<script src="include/semantic.min.js"></script>
+<script src="include/calendar.min.js"></script>
+<script src="include/Chart.js"></script>
+<script src="scripts/statistics.js"></script>
+</body>
+</html>
+
+
