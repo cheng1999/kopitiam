@@ -10,6 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "lokijs": "^1.5.0",
-    "nedb": "^1.8.0"
+    "escpos": "git+https://github.com/cheng1999/node-escpos.git"
   }
 }
