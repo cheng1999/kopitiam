@@ -14,7 +14,7 @@
 <button class="ui button" onclick="back()">Back</button>
 <div id="tablenum" class="layout">
   <div class="ui segment three blue buttons grid">
-    <button v-for="number in tablenumber" v-on:click="selectnumber(number)" class="ui button">{{number}}</button>
+    <button v-for="table in tablenumber" v-on:click="selectnumber(table.number)" class="ui button">{{table.number}}</button>
   </div>
 </div>
 
@@ -37,13 +37,13 @@
   <div class="ui equal width column grid">
     <div class="row">
       <div class="ui column relaxed divided list">
-        <div v-for="(remark, index) in menudatalink.remarks" class="ui checkbox item">
+        <div v-for="(remark, index) in datalink.remarks" class="ui checkbox item">
           <input v-model="remarks" v-bind:value="remark.text" v-bind:id="'remark-'+index" type="checkbox">
           <label v-bind:for="'remark-'+index" class="ui fluid">{{ remark.text }}</label>
         </div>
       </div>
       <div class="ui column relaxed divided list">
-        <div v-for="(extra, index) in menudatalink.extra" class="ui checkbox item">
+        <div v-for="(extra, index) in datalink.extra" class="ui checkbox item">
           <input v-model="extraindex" v-bind:value="index" v-bind:id="'extra-'+index" type="checkbox">
           <label v-bind:for="'extra-'+index" class="ui fluid">{{ extra.text }}
             <a>+RM {{ extra.price.toFixed(2) }}</a>
@@ -72,17 +72,17 @@
       <label class="two wide column">RM {{ order.price.toFixed(2) }}</label>
       <div v-on:click="cancel(order)" class="column ui red button">Cancel</div>
     </div>
-    </div>
   </div>
+</div>
 
 <div id="menu" class="ui segment container cover layout">
   <div class="ui huge menu">
-    <a v-for="category in menudatalink.menu" v-bind:data-tab="'cat'+category.id" class="item">{{ category.name }}</a>
+    <a v-for="category in datalink.categories" v-bind:data-tab="'cat'+category.id" class="item">{{ category.name }}</a>
     <a data-tab="ordercheck" onclick="toggleto('#menu','#checkorder')" class="item right">Check</a>
   </div>
 
-  <div v-for="category in menudatalink.menu" v-bind:data-tab="'cat'+category.id" class="ui tab segment six column grid">
-    <div id="menu_item" v-for="item in category.items" class="ui labeled button four wide">
+  <div v-for="category in datalink.categories" v-bind:data-tab="'cat'+category.id" class="ui tab segment six column grid">
+    <div id="menu_item" v-for="item in getitems(category)" class="ui labeled button four wide">
       <div v-on:click="order(item)" class="ui button">
         {{ item.name }} <br> RM {{ Number(item.price).toFixed(2) }}
       </div>

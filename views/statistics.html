@@ -13,6 +13,8 @@
 
 <body class="ui segment">
 
+<div class="ui ">
+<div class="chartfilter wholescreen">
   <div class="ui input calendar" id="startdate">
     <input type="text" placeholder="Date/Time">
   </div>
@@ -43,17 +45,28 @@
       <div v-for="category in menu" v-bind:data-value="category.id" class="item">{{ category.name }}</div>
     </div>
   </div>  
-  <div onclick="loaddata()" class="ui button">Load</div>
-  <br>
-  <canvas id="chartJSContainer" width="600" height="400"></canvas>
-  <canvas id="myChart" width="400" height="400"></canvas>
+  <div id="summary">
+    <label class="ui header">Summary</label>
+    <label>Total Sell: RM {{ totalprice.toFixed(2) }}</label>
 
+  </div>
+  <div onclick="loaddata()" class="ui button">Load</div>
+</div>
+  <div onclick="togglechartfilter(this)" class="ui small button">Hide</div>
+  <div onclick="makechart()" class="ui small button">Reload</div>
+<div class='wholescreen'>
+  <canvas id="chart" width="600" height="400"></canvas>
+</div>
+</div>
 <script src="include/jquery-3.2.1.min.js"></script>
 <script src="include/vue.min.js"></script>
 <script src="include/semantic.min.js"></script>
 <script src="include/calendar.min.js"></script>
-<script src="include/Chart.js"></script>
+<script src="include/Chart.bundle.min.js"></script>
+<script src="include/hammer.min.js"></script>
+<script src="include/chartjs-plugin-zoom.min.js"></script>
 <script src="scripts/statistics.js"></script>
+<script src="scripts/chartjs_rewrap.js"></script>
 </body>
 </html>
 

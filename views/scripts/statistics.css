@@ -1,4 +1,8 @@
 canvas{
- max-height: 80vh!important;
- max-width: 100vh!important;
+  //width: auto%;
+  max-height: 800px!important;
+  //max-width: 100vh!important;
+}
+.wholescreen{
+  height: 100vh;
 }

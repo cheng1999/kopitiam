@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
+  <link rel="stylesheet" type="text/css" href="scripts/main.css">
+  <title>Kopitiam</title>
+</head>
+
+<body>
+  <div id="menu" class="ui segment container cover layout">
+  <div class="ui huge menu">
+    <a data-tab="items" class="item">Items</a>
+    <a data-tab="printer" class="item">Printers</a>
+    <a data-tab="table" class="item">Tables</a>
+    <a data-tab="extra" class="item">Extra</a>
+  </div>
+
+  <div id="items" data-tab="items" class="ui tab segment six column grid">
+    <div class="ui form segment">
+      <div class="four fields">
+        <div class="field">
+          <input v-model="form.name" placeholder="name" type="text">
+        </div>
+        <div class="field">
+          <select v-model="form.category" class="ui fluid search dropdown category two column">
+            <option v-for="category in datalink.categories" v-bind:value="category.name">{{ category.name }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <select v-model="form.printer" class="ui fluid search dropdown printer six column">
+            <option v-for="printer in datalink.printers" v-bind:value="printer.name">{{ printer.name }}<option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="ui right labeled input">
+            <label class="ui label">RM</label>
+            <input v-model="form.price" placeholder="price" type="number">
+          </div>
+        </div>
+      </div>
+      <button v-on:click="add()" class="ui fluid button">Add</button>
+    </div>
+    <table class="ui celled table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Printer</th>
+          <th>Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in datalink.items">
+          <td>{{ item.name }}</td>
+          <td>{{ item.category }}</td>
+          <td>{{ item.printer }}</td>
+          <td>RM {{ item.price.toFixed(2) }}
+            <div v-on:click="remove(item)" class="ui red button right floated">delete</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="printers" data-tab="printer" class="ui tab segment six column grid">
+    <div class="ui form segment">
+      <div class="three fields">
+        <div class="field">
+          <div class="ui right labeled input">
+            <label class="ui label">Printer Name</label>
+            <input v-model="form.name" placeholder="name" type="text">
+          </div>
+        </div>
+        <div class="field">
+          <div class="ui right labeled input">
+            <label class="ui label">ip</label>
+            <input v-model="form.ip" value="192.168.192.168" type="text">
+          </div>
+        </div>
+        <div class="field">
+          <div class="ui right labeled input">
+            <label class="ui label">port</label>
+            <input v-model="form.port" value="9100" type="number">
+          </div>
+        </div>
+ 
+      </div>
+      <button v-on:click="add()" class="ui fluid button">Add</button>
+    </div>
+    <table class="ui celled table">
+      <thead>
+        <tr>
+          <th>Printer Name</th>
+          <th>Printer URL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="printer in datalink.printers">
+          <td>{{ printer.name }}</td>
+          <td>
+            {{ printer.ip }}:{{ printer.port }}
+            <div v-on:click="remove(printer)" class="ui red button right floated">delete</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div id="tablenum" data-tab="table" class="ui tab segment six column grid">
+    <div class="ui action input">
+      <input v-model="form.number" placeholder="table number" type="text">
+      <button v-on:click="add()" class="ui button">Add</button>
+    </div>
+    <div class="ui segment three blue buttons grid">
+      <div v-for="table in datalink.tablenumber" class="ui large label">
+        {{ table.number }}
+        <i v-on:click="remove(table)" class="delete icon"></i>
+      </div>
+    </div>
+  </div>
+
+  <div id="extra" data-tab="extra" class="ui tab segment six column grid">
+    <div class="ui eight wide column grid left aligned">
+      <div class="row">
+        <h3 class="ui header">Extra:</h3>
+      </div> 
+
+      <div class="ui fluid action input row">
+          <input v-model="extraform.text" placeholder="extra..." type="text">
+          <div class="ui right labeled input">
+            <label class="ui label">RM</label>
+            <input v-model="extraform.price" placeholder="" type="number">
+          </div>
+      </div> 
+      <div v-on:click="add('extra')" class="ui fluid button">Add</div>
+      <table class="ui celled table">
+        <thead>
+          <tr>
+            <th>Text</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="extra in datalink.extra">
+            <td>{{ extra.text }}</td>
+            <td>
+              RM {{ extra.price.toFixed(2) }}
+              <div v-on:click="remove('extra',extra.id)" class="ui red button right floated">delete</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+ 
+    
+    <div class="ui eight wide column grid floated right">
+      <div class="row">
+        <h3 class="ui header">Remarks:</h3>
+      </div>
+      <div class="ui fluid action input row">
+        <input v-model="remarksform.text" placeholder="remarks..." type="text">
+      </div>
+      <div v-on:click="add('remarks')" class="ui fluid button">Add</div>
+      <table class="ui celled table">
+          <thead>
+            <tr><th>Text</th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="remark in datalink.remarks">
+              <td>
+                {{ remark.text }}
+                <div v-on:click="remove('remarks', remark.id)" class="ui red button right floated">delete</div>
+              </td>
+            </tr>
+          </tbody>
+      </table>
+    </div> 
+  </div>
+</div>
+<script src="include/jquery-3.2.1.min.js"></script>
+<script src="include/vue.min.js"></script>
+<script src="include/semantic.min.js"></script>
+<script src="scripts/config.js"></script>
+</body>
+</html>

@@ -6,18 +6,18 @@ const dbop = require('./models/dboperator.js'),
 const ctxtype={
   html:{"Content-Type": "text.html"},
   json:{'Content-Type': 'application/json'}
-}
+};
 
 
-module.exports = async function(req,res){
+module.exports = async (req,res)=>{
   try {
     await routing(req,res);
   }catch(err){
     res.writeHead(500,ctxtype.html);
-    console.error("error:"+err);
+    console.log(err.stack);
     res.end(err.stack);
   }
-}
+};
 
 var routing = async (req,res)=>{
 
@@ -38,20 +38,41 @@ var routing = async (req,res)=>{
 
     case '/order':
       var data = await request.getpost(req);
-      console.log(data);
       data = JSON.parse(data);
-      console.log(data);
+      //console.log(data);
       dbop.log(data);
+      try{
+        await printer.print(data);
+      }catch(err){
+        res.writeHead(500,ctxtype.html);
+        console.error(err);
+        res.end(err.toString());
+      }
       res.writeHead(200, ctxtype.html);  
-      res.end('ok');
+      res.end();
+      break;
+
+    case '/config':
+      var data = await request.getpost(req);
+      data = JSON.parse(data);
+      var resdata;
+      if(data.add){
+        resdata = dbop.add(data.add);
+      };
+      if(data.remove){
+        resdata = dbop.remove(data.remove);
+      }
+      res.end(JSON.stringify(resdata));
+      break;
+
+    case '/getconfig':
       break;
        
     case '/getstatistics':
       var data = await request.getpost(req);
       data = JSON.parse(data);
       var resdata = dbop.getstatistics(data.startdate,data.enddate,data.period);
-      res.write(JSON.stringify(resdata));
-      res.end();
+      res.end(JSON.stringify(resdata));
       break;
 
 

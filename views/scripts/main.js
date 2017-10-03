@@ -1,5 +1,5 @@
-var menudata = {
-      'menu':{},
+var data = {
+      'items':{},
       'tablenumber': [],
       'remarks': []
     }, 
@@ -10,28 +10,30 @@ var menudata = {
     },
     resetorder = JSON.parse(JSON.stringify(order));//make a clone for reset after order
 
-$.getJSON('init', function(data) {
+  
+
+$.getJSON('init', function(thisdata) {
   //data is the JSON string
-  menudata = data;
+  data = thisdata;
   init();
 });
 
 function init(){
   //reform the json data so it will be include some extra data
-  menudata.menu.forEach(function(category){
-    category.items.forEach(function(item){
-      item.count = 0;
-    });
+  data.items.forEach(function(item){
+    item.count = 0;
   });
+
 
   //reset order
   order = JSON.parse(JSON.stringify(resetorder));
 
   //init every vue objects' data variable
-  cat.menudatalink = menudata;
-  extraorder.menudatalink = menudata;
-  tablenum.tablenumber = menudata.tablenumber;
+  extraorder.datalink = data;
+  tablenum.tablenumber = data.tablenumber;
   checkorder.order_list = order;
+  cat.datalink = data;
+  
 
   //init layout view
   $('.layout').hide();
@@ -44,7 +46,7 @@ function init(){
     $('#menu .item').tab(); 
     //makesure there's no actived tab, then active first tab
     $('#menu .item').removeClass('active');
-    $('#menu .tab').removeClass('active');
+    $('#items').removeClass('active');
     //active first tab
     $('#menu .item')[0].className+=' active';
     $('#menu .tab')[0].className+=' active';
@@ -54,12 +56,34 @@ function init(){
 
 function sendorder(){
   
+  var backuporder = JSON.parse(JSON.stringify(order));
   order.items.forEach(function(item){
     //reset counting of item
-    item.itemlink.count=0;
+    //item.itemlink.count=0;
     //delete **itemlink which is useless for serverside before sending data
     delete item.itemlink;
+    
   });
+
+  //sort the items
+  //referrence: http://www.c-sharpcorner.com/UploadFile/fc34aa/sort-json-object-array-based-on-a-key-attribute-in-javascrip/
+  //Comparer Function  
+  function GetSortOrder(prop) {  
+    return function(a, b) {  
+      if (a[prop] > b[prop]) {  
+        return 1;  
+      } else if (a[prop] < b[prop]) {  
+        return -1;  
+      }  
+      return 0;  
+    }; 
+  }  
+  order.items.sort(GetSortOrder("name"));
+  order.items.forEach(function(item){
+    item.extra.sort(GetSortOrder("text"));
+    item.remarks.sort();
+  });
+
   //send order
   $.ajax({
       url: 'order',
@@ -71,10 +95,13 @@ function sendorder(){
         toggleto('#checkorder','#tablenum');
       },
       error: function (data) {
+        order = backuporder;
+        temp=data;
         alert(data.responseText);
     }
   });
 }
+var temp;
 
 //toggle between layout
 var previousid;
@@ -111,7 +138,7 @@ var tablenum = new Vue({
 var extraorder = new Vue({
   el: '#extraorder',
   data: {
-    menudatalink: {}, //given value in init()
+    datalink: {}, //given value in init()
     itemlink: {}, //given value in cat.extra() method
     remarks: [],
     extraindex: [],
@@ -121,12 +148,12 @@ var extraorder = new Vue({
   },
   watch: {
     'extraindex': function(){
-      var extra=[], menudatalink=this.menudatalink;
+      var extra=[], datalink=this.datalink;
       var addprice=0;
       this.extraindex.forEach(function(index){
-        //the index which recorded in extraindex are related in menudatalink.extra
-        extra.push(menudatalink.extra[index]);
-        addprice +=menudatalink.extra[index].price;
+        //the index which recorded in extraindex are related in datalink.extra
+        extra.push(datalink.extra[index]);
+        addprice +=datalink.extra[index].price;
       });
       this.addprice = addprice;
       this.extra = extra;
@@ -134,7 +161,7 @@ var extraorder = new Vue({
   },
   methods: {
     'addremark': function(remark){
-      this.menudatalink.remarks.push({"text":remark});
+      this.datalink.remarks.push({"text":remark});
       this.remarks.push(remark);
     },
     'order': function(){
@@ -184,9 +211,18 @@ var checkorder = new Vue({
 var cat = new Vue({
   el: '#menu',
   data: {
-    menudatalink: {}, //given value in init()
+    datalink: {}, //given value in init()
   },
   methods: {
+    'getitems': function(category){
+      var items = [];
+      this.datalink.items.forEach(function (item){
+        if(item.category === category.name){
+          items.push(item);
+        }
+      });
+      return items;
+    },
     'order': function(item){
       order.items.push({
         itemlink: item,

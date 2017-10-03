@@ -13,14 +13,14 @@
   min-width:60vh;
 }
 
-.ui.list {
+.ui.list, .ui.table {
   height:auto;
   min-height: 50vh;
   overflow: scroll;
 }
 
 .ui.grid {
-  margin-top:0;
+  margin-top:0!important;
   padding-top:2rem;
   padding-bottom:2rem;
 }
