@@ -10,7 +10,7 @@
   <title>Kopitiam</title>
 </head>
 
-<body>
+<body style="overflow:hidden">
 <button class="ui big button" onclick="back()">Back</button>
 <button class="ui big button right floated" onclick="location.reload()">Refresh</button>
 <div id="tablenum" class="ui segment layout">
@@ -38,7 +38,7 @@
   </div>
   <div class="ui equal width column grid">
     <div class="column overflowhandler">
-      <div class="column ui big relaxed divided list" style="padding-bottom:100vh">
+      <div class="column ui big relaxed divided list">
         <div v-for="(remark, index) in datalink.remarks" class="ui big checkbox item">
           <input v-model="remarks" v-bind:value="remark.text" v-bind:id="'remark-'+index" type="checkbox">
           <label v-bind:for="'remark-'+index" class="ui big label fluid">{{ remark.text }}</label>
@@ -46,7 +46,7 @@
       </div>
     </div>
     <div class="column overflowhandler">
-      <div class="column ui big relaxed divided list" style="padding-bottom:100vh">
+      <div class="column ui big relaxed divided list">
         <div v-for="(extra, index) in datalink.extra" class="ui checkbox item">
           <input v-model="extraindex" v-bind:value="index" v-bind:id="'extra-'+index" type="checkbox">
           <label v-bind:for="'extra-'+index" class="ui big label fluid">{{ extra.text }}
@@ -61,7 +61,7 @@
 
 <div id="home" class="ui segment layout nopadding nomargin">
 <div class="ui grid">
-  <div id="checkorder" class="eight wide column" style="padding-right:0;padding-top:0">
+  <div id="checkorder" class="eight wide column nopadding">
     <div class="ui huge label fluid">Ordered:
       <a class="ui green">RM{{ orderlink.totalprice.toFixed(2) }}</a>
     </div>
@@ -76,7 +76,7 @@
       </thead>
     </table>
     <div class="overflowhandler">
-    <table class="ui fixed structured table" style="margin-bottom:900px">
+    <table class="ui fixed structured table">
       <tbody>
         <tr v-for="(order, index) in orderlink.items">
           <td v-on:click="cancel(order)" colspan="1" class="ui center aligned fluid button"><i class="small minus icon nomargin"></i></td>
@@ -95,25 +95,27 @@
   </div>
   <div onclick="sendorder()" class="ui green fluid huge rightbottom button" style="width:50%">Send</div>
 
-  <div id="menu" class="eight wide column" style="padding-top:0">
-    <div class="ui mobile reversed equal width grid category">
-      <div v-for="category in datalink.categories" class="column nopadding nomargin">
-        <div v-on:click="showcat(category)" class="ui fluid big button">
-          {{ category.name }}
+  <div id="menu" class="eight wide column" style="width:49%!important;padding-top:0!important">
+    <div class="ui width grid">
+      <div class="doubling four column row category nopadding nomargin">
+        <div v-for="category in datalink.categories" class="ui fluid button column nopadding nomargin">
+          <div v-on:click="showcat(category)" class="ui fluid big button">
+            {{ category.name }}
+          </div>
         </div>
       </div>
-    </div>
-    <div class="ui mobile reversed equal width grid" style="padding-top:1rem">
-      <div v-for="item in items" class="column nopadding nomargin">
-        <div class="ui labeled fluid button">
-          <div v-on:click="order(item)" class="ui fluid large basic button">
+      <div class="doubling four column row overflowhandler" style="padding-bottom:900px!important">
+      <div v-for="item in items" v-on:click="order(item)" class="ui big basic button column nomargin" style="min-height:5em">
             {{ item.name }} <br> RM {{ Number(item.price).toFixed(2) }}
-          </div>
+            <a v-on:click="extra(item)" class="ui fluid label center bottom attached" >
+              <i class="small plus icon detail"></i>
+            </a>
        </div>
-        <a v-on:click="extra(item)" class="ui fluid label center aligned">
-          <i class="small plus icon detail"></i>
-        </a>
       </div>
+ 
+    </div>
+    <div class="ui width grid" style="padding-top:1rem">
+     </div>
     </div>
   </div>
 </div>

@@ -1,4 +1,4 @@
-
+//bug
 var util  = require('util'),
     spawn = require('child_process').spawn;
                                           // options
@@ -7,13 +7,17 @@ module.exports.update = ()=>{
     var update = spawn('sh', ['update.sh']); // the second arg is the command 
 
     update.stdout.on('data', function (data) {    // register one or more handlers
-      console.log('stdout: ' + data);
+      //console.log('stdout: ' + data);
+      if(data.toString()==='updated!\n'){
+        resolve();
+        console.log(data);
+      }
     });
     
     update.stderr.on('data', function (data) {
-      console.log('stderr: ' + data);
-      reject(data);
-    });
+      //console.log('stderr: ' + data);
+      //reject(data);
+    })
 
     update.on('exit', function (code) {
       resolve();

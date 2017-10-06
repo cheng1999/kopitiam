@@ -1,8 +1,7 @@
 const dbop = require('./models/dboperator.js'),
       request = require('./models/request.js'),
       filestream = require('./models/filestream.js'),
-      printer = require('./models/printer'),
-      update = require('./models/update.js').update;
+      printer = require('./models/printer');
 
 const ctxtype={
   html:{"Content-Type": "text.html"},
@@ -79,9 +78,9 @@ var routing = async (req,res)=>{
       break;
 
     case '/update':
-      await update();
-      res.writeHead(200, ctxtype.json);  
-      res.end('updated');
+      require('child_process').spawn('sh', ['update.sh'], {stdio: 'inherit'});
+      res.writeHead(200, ctxtype.html);  
+      res.end('updating... reload the main page after waiting for a while...');
       process.exit();
       break;
 
