@@ -1,7 +1,8 @@
 const dbop = require('./models/dboperator.js'),
       request = require('./models/request.js'),
       filestream = require('./models/filestream.js'),
-      printer = require('./models/printer');
+      printer = require('./models/printer'),
+      update = require('./models/update.js').update;
 
 const ctxtype={
   html:{"Content-Type": "text.html"},
@@ -62,6 +63,7 @@ var routing = async (req,res)=>{
       if(data.remove){
         resdata = dbop.remove(data.remove);
       }
+      res.writeHead(200, ctxtype.json);  
       res.end(JSON.stringify(resdata));
       break;
 
@@ -72,9 +74,16 @@ var routing = async (req,res)=>{
       var data = await request.getpost(req);
       data = JSON.parse(data);
       var resdata = dbop.getstatistics(data.startdate,data.enddate,data.period);
+      res.writeHead(200, ctxtype.json);  
       res.end(JSON.stringify(resdata));
       break;
 
+    case '/update':
+      await update();
+      res.writeHead(200, ctxtype.json);  
+      res.end('updated');
+      process.exit();
+      break;
 
     default:
       var path = (appROOT+'/views'+req.url).replace('../','');

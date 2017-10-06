@@ -231,7 +231,9 @@ module.exports.getPrinter = (itemid)=>{
 module.exports.log = (data)=>{
   //type, date
   data.items.forEach((item)=>{
-    log.insert({'itemid': item.id, 'price': item.price ,'date': new Date});
+    for(c=0; c<item.count; c++){
+      log.insert({'itemid': item.id, 'price': item.price ,'date': new Date});
+    }
   });
 }
 

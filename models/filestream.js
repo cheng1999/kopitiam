@@ -1,12 +1,10 @@
-const fs = require('fs');
-module.exports.readfile = (path)=>{
-  return new Promise((resolve, reject)=>{
-    fs.readFile(path, (err, data)=>{
-      if(err) reject(err); 
-      resolve(data);
-    });
-  });
-}
+const fs = require('fs'),
+      promisify = require('util').promisify;
+
+module.exports.readfile = async (path)=>{
+  var readFile = promisify(fs.readFile);
+  return await readFile(path);
+};
 
 module.exports.checkfile = (path)=>{
   return fs.existsSync(path);

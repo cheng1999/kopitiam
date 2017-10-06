@@ -30,9 +30,12 @@ function init(){
 
   //init every vue objects' data variable
   extraorder.datalink = data;
+  extraorder.orderlink = order;
   tablenum.tablenumber = data.tablenumber;
-  checkorder.order_list = order;
+  tablenum.orderlink = order;
+  checkorder.orderlink = order;
   cat.datalink = data;
+  cat.showcat(data.categories[0]);
   
 
   //init layout view
@@ -40,18 +43,18 @@ function init(){
   toggleto('#tablenum','#tablenum');
 
   //take reference to https://vuejs.org/v2/api/#Vue-nextTick
-  Vue.nextTick(function(){
+  //Vue.nextTick(function(){
     //semantic's function: combine menu and tab together,
     //when menu item was clicked, tab will show as item clicked
-    $('#menu .item').tab(); 
+    //$('#menu .item').tab(); 
     //makesure there's no actived tab, then active first tab
-    $('#menu .item').removeClass('active');
-    $('#items').removeClass('active');
+    //$('#menu .item').removeClass('active');
+    //$('#items').removeClass('active');
     //active first tab
-    $('#menu .item')[0].className+=' active';
-    $('#menu .tab')[0].className+=' active';
+    //$('#menu .item')[0].className+=' active';
+    //$('#menu .tab')[0].className+=' active';
     //$('.ui.modal.tablenum').modal('show');
-  });
+  //});
 }
 
 function sendorder(){
@@ -96,28 +99,61 @@ function sendorder(){
       },
       error: function (data) {
         order = backuporder;
-        temp=data;
+        //temp=data;
         alert(data.responseText);
     }
   });
 }
-var temp;
+//var temp;
+
+//to check if order is repeated, 
+//then simply do count++ but not make a new order with same data
+function checkrepeated(order_tocheck){
+  //clone it, so it is not a link
+  order_tocheck = JSON.parse(JSON.stringify(order_tocheck));
+
+  for(c=0; c<order.items.length; c++){
+    var item = order.items[c];
+    if(order_tocheck.id !== order.items[c].id)continue;
+
+    //count maynot same even order are same
+    order_tocheck.count = order.items[c].count;
+    // check if order is totally same
+    if(JSON.stringify(order_tocheck) === JSON.stringify(order.items[c])){
+      order.items[c].count++;
+      return true;
+    }
+  }
+  //reset count
+  return false;
+}
 
 //toggle between layout
+var urlhash_times=0;
 var previousid;
 function toggleto(currentid, targetid){
+  urlhash_times++; location.hash = urlhash_times;
   previousid = currentid;
   $(currentid).hide();
   $(targetid).show();
 }
 function back(){
-  //if menu is visible, of coz previousid is #tablenum
-  var menushown = $('#menu').is(':visible');
-  previousid = (menushown ? '#tablenum' : previousid);
+  urlhash_times++; location.hash = urlhash_times;
+  //if home is visible, of coz previousid is #tablenum
+  var homeshown = $('#home').is(':visible');
+  previousid = (homeshown ? '#tablenum' : previousid);
 
   $('.layout').hide();
   $(previousid).show();
 }
+//listen back button of device
+window.onhashchange = function(){     
+  var thistimes = parseInt(location.hash.replace('#',''),10);     
+  //if hash was minus 1, mean back button pressed
+  if(thistimes == urlhash_times-1){
+    back();
+  }
+};
 
 //vue objects
 var tablenum = new Vue({
@@ -129,8 +165,8 @@ var tablenum = new Vue({
   methods: {
     selectnumber: function(tablenumber){
       init();
-      order.tablenumber=tablenumber;
-      toggleto('#tablenum','#menu');
+      this.orderlink.tablenumber=tablenumber;
+      toggleto('#tablenum','#home');
     }
   }
 });
@@ -138,7 +174,9 @@ var tablenum = new Vue({
 var extraorder = new Vue({
   el: '#extraorder',
   data: {
+    temp:{},temp2:{},
     datalink: {}, //given value in init()
+    orderlink: {},
     itemlink: {}, //given value in cat.extra() method
     remarks: [],
     extraindex: [],
@@ -165,20 +203,25 @@ var extraorder = new Vue({
       this.remarks.push(remark);
     },
     'order': function(){
-      order.items.push({
+      var order_tocheck = { 
+        'count': 1,
         'itemlink': this.itemlink,
         'id': this.itemlink.id,
         'name': this.itemlink.name,
         'remarks': this.remarks,
         'extra': this.extra,
         'price': this.itemlink.price + this.addprice
-      });
-      order.totalprice += this.itemlink.price + this.addprice;
-      this.itemlink.count +=1;
+      };
+      if(!checkrepeated(order_tocheck)){
+        this.orderlink.items.push(order_tocheck);
+      }
+
+      this.orderlink.totalprice += this.itemlink.price + this.addprice;
+      //this.itemlink.count +=1;
       //reset
       this.remarks=[];
       this.extraindex=[];
-      toggleto('#extraorder','#menu');
+      toggleto('#extraorder','#home');
     }
   }
 });
@@ -186,7 +229,7 @@ var extraorder = new Vue({
 var checkorder = new Vue({
   el: '#checkorder',
   data: {
-    order_list: order,
+    orderlink: order,
   },
   methods: {
     'extratext': function(item){
@@ -200,10 +243,16 @@ var checkorder = new Vue({
       return text;
     },
     'cancel': function(orderitem){
-      orderitem.itemlink.count -=1;
-      this.order_list.totalprice -=orderitem.price;
-      var index= this.order_list.items.indexOf(orderitem);
-      this.order_list.items.splice(index,1);
+      orderitem.count --;
+      this.orderlink.totalprice -= orderitem.price;
+      if(orderitem.count !== 0)return;
+      //remove order
+      var index= this.orderlink.items.indexOf(orderitem);
+      this.orderlink.items.splice(index,1);
+    },
+    'add': function(orderitem){
+      orderitem.count ++;
+      this.orderlink.totalprice += orderitem.price;
     }
   }
 });
@@ -211,35 +260,41 @@ var checkorder = new Vue({
 var cat = new Vue({
   el: '#menu',
   data: {
-    datalink: {}, //given value in init()
+    datalink: {}, //value given in init()
+    items: [],//value given in methods switch()
   },
   methods: {
-    'getitems': function(category){
-      var items = [];
+    'test':function(a){},
+    'showcat': function(category){
+      var cat_items = [];
       this.datalink.items.forEach(function (item){
         if(item.category === category.name){
-          items.push(item);
+          cat_items.push(item);
         }
       });
-      return items;
+      this.items = cat_items;
     },
     'order': function(item){
-      order.items.push({
-        itemlink: item,
+      var order_tocheck = {
+        'count': 1,
+        'itemlink': item,
         'id': item.id,
         'name': item.name,
         'remarks': [],
         'extra': [],
         'price': item.price
-      });
+      };
+      if(!checkrepeated(order_tocheck)){
+        order.items.push(order_tocheck);
+      }
       order.totalprice += item.price;
-      item.count +=1;
+      //item.count +=1;
     },
     'extra': function(item){
       extraorder.itemlink = item;
       extraorder.remarks = [];
       extraorder.extra = [];
-      toggleto('#menu','#extraorder');
+      toggleto('#home','#extraorder');
     }
   }
 });

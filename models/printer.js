@@ -56,6 +56,7 @@ var printout = (printername)=>{
 };
 
 // check repeated items or not, if, delete, then return count of items
+/*
 var count_remove_same_item = (data, item)=>{
   var count=0;
   for (var c=0; c<data.items.length; c++){
@@ -76,8 +77,8 @@ var count_remove_same_item = (data, item)=>{
     }
   });
   */
-  return count;
-};
+  //return count;
+//};
 
 
 // init the printer
@@ -130,11 +131,11 @@ module.exports.print = async (data)=>{
     });
     var extratext = "("+extra_items.join()+" / "+itemclone.remarks.join()+")";
     //itemclone.name+
-    extratext = (extratext == '( / )' ? null: extratext);
-    var count = count_remove_same_item(data, itemclone);
-    var itemprice = itemclone.price*count;
+    extratext = (extratext === '( / )' ? null: extratext);
+    //var count = count_remove_same_item(data, itemclone);
+    var itemprice = itemclone.price*item.count;
     printers_totalprice[printername].totalprice += itemprice;
-    PDs[printername].printer.align('lt').text(count+" X "+itemclone.name);
+    PDs[printername].printer.align('lt').text(item.count+" X "+itemclone.name);
     if(extratext)PDs[printername].printer.text(extratext);
     PDs[printername].printer.align('rt').text('RM '+ (itemprice).toFixed(2));
   });

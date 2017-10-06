@@ -1,4 +1,9 @@
-.ui.modal{
+body {
+  overflow:hidden;
+  //font-size: 1.2em;
+}
+
+.ui.modal {
   height:100%;
   width:100%!important;
   top:0!important;
@@ -9,20 +14,39 @@
   margin: 0;
 }
 
-.ui.modal.tablenum {
-  min-width:60vh;
+td {
+  font-size:1.5em;
 }
 
-.ui.list, .ui.table {
-  height:auto;
-  min-height: 50vh;
-  overflow: scroll;
+.halfwidth {
+  width=50%!important;
+}
+
+.order_additions {
+  word-wrap: break-word;
+}
+
+.overflowhandler {
+  height: 100vh;
+  overflow-y: scroll;
+}
+
+.rightbottom {
+  position: fixed;
+  bottom: 0px;
+  left: 0px; 
 }
 
 .ui.grid {
   margin-top:0!important;
-  padding-top:2rem;
-  padding-bottom:2rem;
+}
+
+.nopadding {
+  padding:0!important;
+}
+
+.nomargin {
+  margin:0!important;
 }
 
 .hide {
