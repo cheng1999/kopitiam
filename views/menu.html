@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
+  <link rel="stylesheet" type="text/css" href="scripts/main.css">
+  <title>Kopitiam</title>
+</head>
+
+<body class="ui segment container grid center aligned" style="height:100%">
+  <div class="row">
+    <button onclick="location.href='statistics.html'" class="ui fluid big button">Statistics</button>
+  </div>
+  <div class="row">
+    <button onclick="location.href='config.html'" class="ui fluid big button">Config</button>
+  </div>
+  <div class="row">
+    <button onclick="location.href='index.html'" class="ui fluid big button">Order</button>
+  </div>
+  <div class="row">
+    <button onclick="location.href='update'" class="ui fluid big button">Update</button>
+  </div>
+  <div class="row">
+    <button onclick="location.href='backupdb.zip'" class="ui fluid big button">Backup</button>
+  </div> 
+  <div class="row">
+    <form action="restore" method="post" enctype="multipart/form-data" class="ui form" style="width:100%">
+      <input type="file" name="filetoupload"><br>
+      <input type="submit" class="ui submit fluid large button" value="Restore">
+    </form>
+  </div>
+
+</body>
+
+
+</html>

@@ -95,7 +95,7 @@ function sendorder(){
       dataType: 'html',
       async: false,
       success: function(data) {
-        toggleto('#checkorder','#tablenum');
+        toggleto('#home','#tablenum');
       },
       error: function (data) {
         order = backuporder;
@@ -264,7 +264,6 @@ var cat = new Vue({
     items: [],//value given in methods switch()
   },
   methods: {
-    'test':function(a){},
     'showcat': function(category){
       var cat_items = [];
       this.datalink.items.forEach(function (item){

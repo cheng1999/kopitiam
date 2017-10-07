@@ -31,20 +31,11 @@
         <div v-on:click="addremark(remarktext)" class="ui button">add remarks</div>
     </div> 
     <div class="row">
-      <h3 class="ui header column">Remarks:</h3>
       <h3 class="ui header column">Extra:</h3>
+      <h3 class="ui header column">Remarks:</h3>
     </div>
-
   </div>
   <div class="ui equal width column grid">
-    <div class="column overflowhandler">
-      <div class="column ui big relaxed divided list">
-        <div v-for="(remark, index) in datalink.remarks" class="ui big checkbox item">
-          <input v-model="remarks" v-bind:value="remark.text" v-bind:id="'remark-'+index" type="checkbox">
-          <label v-bind:for="'remark-'+index" class="ui big label fluid">{{ remark.text }}</label>
-        </div>
-      </div>
-    </div>
     <div class="column overflowhandler">
       <div class="column ui big relaxed divided list">
         <div v-for="(extra, index) in datalink.extra" class="ui checkbox item">
@@ -52,6 +43,14 @@
           <label v-bind:for="'extra-'+index" class="ui big label fluid">{{ extra.text }}
             <a>+RM {{ extra.price.toFixed(2) }}</a>
           </label>
+        </div>
+      </div>
+    </div>
+    <div class="column overflowhandler">
+      <div class="column ui big relaxed divided list">
+        <div v-for="(remark, index) in datalink.remarks" class="ui big checkbox item">
+          <input v-model="remarks" v-bind:value="remark.text" v-bind:id="'remark-'+index" type="checkbox">
+          <label v-bind:for="'remark-'+index" class="ui big label fluid">{{ remark.text }}</label>
         </div>
       </div>
     </div>

@@ -25,12 +25,12 @@ device.open(function(err){
 
 });
 */
-var makehearder = (printer)=>{
+var makeheader = (printer)=>{
   printer
   .font('a')
-  .align('ct')
-  .size(2,2)
-  .text('LIAN KIEW CAFE')
+  //.align('ct')
+  //.size(2,2)
+  //.text('LIAN KIEW CAFE')
   .size(1,1)
   .align('rt')
   .text(new Date().toLocaleString());
@@ -48,7 +48,7 @@ var printout = (printername)=>{
         //delete PDs[printername].printer;
         //PDs[printername].device = new escpos.Network(printerdata.ip, printerdata.port) ,
         //PDs[printername].printer = new escpos.Printer(PDs[printerdata.name].device);
-        makehearder(PDs[printername].printer);
+        makeheader(PDs[printername].printer);
         resolve('ok');
       }catch(err){ reject(err); }
     });
@@ -86,6 +86,10 @@ var count_remove_same_item = (data, item)=>{
 //Printers and Devices
 var PDs = [];
 dbop.autoloadCallback(()=>{
+  this.reloadPrinters();
+});
+
+module.exports.reloadPrinters = ()=>{
   config.printers = dbop.getInitJson().printers;
 
   config.printers.forEach( (printerdata)=>{
@@ -96,9 +100,10 @@ dbop.autoloadCallback(()=>{
       'printer': null
     };
     PDs[printerdata.name].printer = new escpos.Printer(PDs[printerdata.name].device);
-    makehearder(PDs[printerdata.name].printer);
+    makeheader(PDs[printerdata.name].printer);
   });
-});
+}
+
 // print function
 module.exports.print = async (data)=>{
   return new Promise((resolve,reject)=>{

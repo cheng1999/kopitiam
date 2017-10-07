@@ -1,10 +1,12 @@
 const dbop = require('./models/dboperator.js'),
       request = require('./models/request.js'),
       filestream = require('./models/filestream.js'),
-      printer = require('./models/printer');
+      printer = require('./models/printer'),
+      bash = require('./models/bash.js'),
+      uploadfile = require('./models/uploadfile.js');
 
 const ctxtype={
-  html:{"Content-Type": "text.html"},
+  html:{"Content-Type": "text/html"},
   json:{'Content-Type': 'application/json'}
 };
 
@@ -37,7 +39,7 @@ var routing = async (req,res)=>{
       break;
 
     case '/order':
-      var data = await request.getpost(req);
+      var data = await request.getdata(req);
       data = JSON.parse(data);
       //console.log(data);
       dbop.log(data);
@@ -53,15 +55,16 @@ var routing = async (req,res)=>{
       break;
 
     case '/config':
-      var data = await request.getpost(req);
+      var data = await request.getdata(req);
       data = JSON.parse(data);
       var resdata;
       if(data.add){
         resdata = dbop.add(data.add);
-      };
+      }
       if(data.remove){
         resdata = dbop.remove(data.remove);
       }
+      printer.reloadPrinters();
       res.writeHead(200, ctxtype.json);  
       res.end(JSON.stringify(resdata));
       break;
@@ -70,7 +73,7 @@ var routing = async (req,res)=>{
       break;
        
     case '/getstatistics':
-      var data = await request.getpost(req);
+      var data = await request.getdata(req);
       data = JSON.parse(data);
       var resdata = dbop.getstatistics(data.startdate,data.enddate,data.period);
       res.writeHead(200, ctxtype.json);  
@@ -78,9 +81,31 @@ var routing = async (req,res)=>{
       break;
 
     case '/update':
-      require('child_process').spawn('sh', ['update.sh'], {stdio: 'inherit'});
+      //require('child_process').spawn('sh', ['bash/update.sh'], {stdio: 'inherit'});
+      await bash.update();
+      //spawn('sh', ['bash/delaylaunch.sh'], {stdio: 'inherit'});
       res.writeHead(200, ctxtype.html);  
-      res.end('updating... reload the main page after waiting for a while...');
+      res.end('updated');
+      bash.delaylaunch();
+      process.exit();
+      break;
+
+    case '/backupdb.zip':
+      await bash.backupdb();
+      var path = appROOT+'/views/backupdb.zip';
+      var file = await filestream.readfile(path);
+      //res.writeHead(200);
+      res.write(file);
+      res.end();
+      break;
+
+    case '/restore':
+      //var file = await request.getdata(req);
+      await uploadfile.forrestore(req, appROOT+'/views/', 'backupdb.zip');
+      await bash.restoredb();
+      res.writeHead(200, ctxtype.html);  
+      res.end('done');
+      bash.delaylaunch();
       process.exit();
       break;
 
@@ -88,13 +113,12 @@ var routing = async (req,res)=>{
       var path = (appROOT+'/views'+req.url).replace('../','');
       if(filestream.checkfile(path)){
         var html = await filestream.readfile(path);
-        res.write(html);
+        res.end(html);
       }
       else{
         res.writeHead(404, ctxtype.html);
-        res.write('404');
+        res.end('404');
       }
-      res.end();
 
   }
 /*
@@ -108,7 +132,7 @@ var routing = async (req,res)=>{
         res.writeHead(200, ctxtype.json);
 
         if(req.url == '/attendance' && req.method == 'POST'){
-            var data = await request.getpost(req);//get the post from req data
+            var data = await request.getdata(req);//get the post from req data
             //var json =  JSON.parse(post);
             res.end(data);
         }

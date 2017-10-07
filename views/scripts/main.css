@@ -1,9 +1,4 @@
 
-body {
-  //overflow:hidden;
-  //font-size: 1.2em;
-}
-
 .ui.modal {
   height:100%;
   width:100%!important;
@@ -18,6 +13,16 @@ body {
 td {
   font-size:1.5em;
 }
+
+/*---https://github.com/kylefox/jquery-tablesort---*/
+th.sorted.ascending:after {
+	content: "  \2191";
+}
+
+th.sorted.descending:after {
+	content: " \2193";
+}
+/*-----*/
 
 .halfwidth {
   width=50%!important;

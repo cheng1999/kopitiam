@@ -27,6 +27,8 @@ function init(){
     //$('.ui.modal.tablenum').modal('show');
     $('.ui.dropdown.category').dropdown({allowAdditions: true});
     $('.ui.dropdown.printer').dropdown({allowAdditions: false});
+    //sort table
+    $('table').tablesort();
   });
 }
 
