@@ -90,6 +90,13 @@ var routing = async (req,res)=>{
       process.exit();
       break;
 
+    case '/restart':
+      res.writeHead(200, ctxtype.html);  
+      res.end('updated');
+      bash.delaylaunch();
+      process.exit();
+      break;
+
     case '/backupdb.zip':
       await bash.backupdb();
       var path = appROOT+'/views/backupdb.zip';

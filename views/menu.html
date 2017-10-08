@@ -23,14 +23,15 @@
   <div class="row">
     <button onclick="location.href='update'" class="ui fluid big button">Update</button>
   </div>
-  <div class="row">
-    <button onclick="location.href='backupdb.zip'" class="ui fluid big button">Backup</button>
+  <div class="stackable three column row">
+    <button onclick="location.href='backupdb.zip'" class="ui button column nomargin">Backup</button>
+    <form action="restore" method="post" enctype="multipart/form-data" class="ui form wide column nomargin">
+      <input type="file" name="filetoupload" style="height:50%">
+      <input type="submit" class="ui submit fluid large button" style="height:50%" value="Restore">
+    </form>
+    <button onclick="location.href='restart'" class="ui button column nomargin">Restart</button>
   </div> 
   <div class="row">
-    <form action="restore" method="post" enctype="multipart/form-data" class="ui form" style="width:100%">
-      <input type="file" name="filetoupload"><br>
-      <input type="submit" class="ui submit fluid large button" value="Restore">
-    </form>
   </div>
 
 </body>

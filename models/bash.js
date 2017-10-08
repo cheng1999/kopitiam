@@ -29,9 +29,8 @@ module.exports.update = ()=>{
 
 module.exports.backupdb = ()=>{
   return new Promise((resolve, reject)=>{
-    console.log('test');
-    var backupdb = spawn('sh', ['bash/bash.sh', 'backupdb']); 
-    backupdb.on('exit', function (code) {
+    var sh = spawn('sh', ['bash/bash.sh', 'backupdb']); 
+    sh.on('exit', function (code) {
       resolve();
     });
   });
@@ -39,8 +38,8 @@ module.exports.backupdb = ()=>{
 
 module.exports.restoredb = ()=>{
   return new Promise((resolve, reject)=>{
-    var backupdb = spawn('sh', ['bash/bash.sh', 'restoredb']); // the second arg is the command 
-    backupdb.on('exit', function (code) {
+    var sh = spawn('sh', ['bash/bash.sh', 'restoredb']); // the second arg is the command 
+    sh.on('exit', function (code) {
       resolve();
     });
   });

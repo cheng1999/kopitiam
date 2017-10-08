@@ -66,7 +66,7 @@ var vueItems = new Vue({
   methods: {
     'add': function(){
       var datalink = this.datalink;
-      this.form.price = parseInt(this.form.price);
+      this.form.price = parseFloat(this.form.price);
       sendAjax({
         data:{
           'add':{
