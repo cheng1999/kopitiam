@@ -34,6 +34,8 @@ function databaseInitialize() {
     items = db.addCollection('items');
     //insert configured items
     config.items.forEach( (x)=> {
+      //default position
+      x.position = items.find({ 'category': x.category }).length;
       items.insert(x)
     });
   }
@@ -86,7 +88,9 @@ var rewrap = (target, data)=>{
         'name': data.name,
         'category': data.category,
         'price': data.price,
-        'printer': data.printer
+        'printer': data.printer,
+        'color': data.color,
+        'position': data.position,
       };
     case 'remarks':
       return {
@@ -143,7 +147,7 @@ module.exports.getInitJson = ()=>{
   temp.forEach((data)=>{
     categories_list.push(rewrap('category', data));
   });
-  var temp = items.find();
+  var temp = items.chain().find().simplesort('position').data();
   temp.forEach((data)=>{
     items_list.push(rewrap('items', data));
   });
@@ -241,10 +245,12 @@ module.exports.add = (data)=>{
   var resdata;
   switch(data.target){
     case 'items':
-      resdata = rewrap(data.target, items.insert(data.data));
-      //console.log(categories.findOne({'name': data.data.category}));
-      if(!categories.findOne({'name': data.data.category})){
-        categories.insert({'name': data.data.category});
+      //default position
+      data.position = items.find({ 'category': data.category }).length;
+      resdata = rewrap(data.target, items.insert(data.item));
+      //console.log(categories.findOne({'name': data.item.category}));
+      if(!categories.findOne({'name': data.item.category})){
+        categories.insert({'name': data.item.category});
       }
       break;
     case 'printers':
@@ -296,3 +302,47 @@ module.exports.remove = (data)=>{
   needtoRefresh = true;
   return 1;
 };
+
+module.exports.update = (data)=>{
+  switch(data.target){
+    case 'items':
+      var item = items.findOne({ '$loki': data.item.id });
+      item.name = data.item.name;
+      item.category = data.item.category;
+      item.printer = data.item.printer;
+      item.price = data.item.price;
+      item.color = data.item.color;
+      items.update(item);
+      break;
+    case 'item_position':
+      var item = items.findOne({ '$loki': data.id });
+      var samecat = items.find({ 'category': item.category }); //item which is same category
+      //shifting all position
+      for(var c=0; c<samecat.length; c++){
+        if(data.position >= samecat[c].position &&
+                            samecat[c].position > data.position_bfr){
+          samecat[c].position --;
+        }
+        if(data.position <= samecat[c].position &&
+                            samecat[c].position < data.position_bfr){
+          samecat[c].position ++;
+        }
+      }
+      //update every shifted
+      for(var c=0; c<samecat.length; c++){
+        items.update(samecat[c]);
+      }
+      //update its own position
+      item.position = data.position;
+      items.update(item);
+      for(var c=0; c<samecat.length; c++){
+      }
+      break;
+    default:
+      throw new Error("invalid target");
+  }
+  needtoRefresh = true;
+  return 1;
+};
+
+

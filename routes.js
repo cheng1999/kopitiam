@@ -60,11 +60,16 @@ var routing = async (req,res)=>{
       var resdata;
       if(data.add){
         resdata = dbop.add(data.add);
+        if(data.add.target == 'printers')printer.reloadPrinters();
       }
       if(data.remove){
         resdata = dbop.remove(data.remove);
+        if(data.remove.target == 'printers')printer.reloadPrinters();
       }
-      printer.reloadPrinters();
+      console.log(data);
+      if(data.update){
+        resdata = dbop.update(data.update);
+      }
       res.writeHead(200, ctxtype.json);  
       res.end(JSON.stringify(resdata));
       break;

@@ -261,7 +261,7 @@ var cat = new Vue({
   el: '#menu',
   data: {
     datalink: {}, //value given in init()
-    items: [],//value given in methods switch()
+    items: [], //value given in methods showcat()
   },
   methods: {
     'showcat': function(category){
