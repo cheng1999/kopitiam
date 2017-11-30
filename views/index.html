@@ -7,6 +7,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
   <link rel="stylesheet" type="text/css" href="scripts/main.css">
+  <!-- copy from https://www.favicon-generator.org/ !-->
+    <link rel="apple-touch-icon" sizes="57x57" href="favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+    <link rel="manifest" href="favicon/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
   <title>Kopitiam</title>
 </head>
 
@@ -60,7 +78,7 @@
 
 <div id="home" class="ui segment layout nopadding nomargin">
 <div class="ui grid">
-  <div id="checkorder" class="eight wide column nopadding">
+  <div id="checkorder" class="six wide column nopadding">
     <div class="ui huge label fluid">Ordered:
       <a class="ui green">RM{{ orderlink.totalprice.toFixed(2) }}</a>
     </div>
@@ -92,9 +110,9 @@
     </table>
     </div>
   </div>
-  <div onclick="sendorder()" class="ui green fluid huge rightbottom button" style="width:50%">Send</div>
+  <div onclick="sendorder()" class="ui green fluid huge rightbottom button" style="width:37%">Send</div>
 
-  <div id="menu" class="eight wide column" style="width:49%!important;padding-top:0!important">
+  <div id="menu" class="ten wide column" style="width:62%!important;padding-top:0!important">
     <div class="ui grid">
       <div class="doubling four column row category nopadding nomargin">
         <div v-for="category in datalink.categories" class="ui fluid button column nopadding nomargin">
@@ -104,11 +122,13 @@
         </div>
       </div>
       <div class="doubling four column row overflowhandler" style="padding-bottom:900px!important">
-      <div v-for="item in items" v-on:click="order(item)" class="ui big button column nomargin" v-bind:style="'background-color:' + item.color"  style="min-height:5em">
-            {{ item.name }} <br> RM {{ Number(item.price).toFixed(2) }}
-            <a v-on:click="extra(item)" class="ui fluid label center bottom attached" >
-              <i class="small plus icon detail"></i>
-            </a>
+      <div v-for="item in items"class="ui column nomargin nopadding">
+        <a v-on:click="order(item)" class="ui fluid big button" v-bind:style="'background-color:' + item.background + ';color:' + item.font" style="min-height:5em">
+          {{ item.name }} <br> RM {{ Number(item.price).toFixed(2) }}
+        </a>
+        <a v-on:click="extra(item)" class="ui fluid label center aligned grid bottom attached" >
+          <i class="small plus icon detail"></i>
+        </a>
        </div>
       </div>
     </div>

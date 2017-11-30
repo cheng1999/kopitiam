@@ -5,7 +5,7 @@ $.getJSON('init', function(thisdata) {
   data = thisdata;
   init();
 });
-
+var temp;
 function init(){
 
   vueItems.datalink = data;
@@ -37,19 +37,37 @@ function init(){
 
     //drag to sort item
     //https://stackoverflow.com/a/12962399/5617437
-    $("#draggable_items").sortable({
+    $("#draggable_items, #draggable_remarks, #draggable_extra").sortable({
+      handle: '.drag_handle',
       start: function(event, ui) {
         ui.item.position_bfr = ui.item.index();
       },
       stop: function(event, ui) {
-        ui.item.position_after = ui.item.index();
+        var sortable_id = ui.item.parent().get(0).id;
+        var target, id;
+
+        switch(sortable_id){
+          case 'draggable_items':
+            target = 'item_position';
+            id = vueArrange.clicked_item.id; //the clicked item in vueItems is the item to change position
+            break;
+          case 'draggable_remarks':
+            target = 'remark_position';
+            id = vueExtra.clicked_item.id;
+            break;
+          case 'draggable_extra':
+            target = 'extra_position';
+            id = vueExtra.clicked_item.id;
+            break;
+        };
+
         sendAjax({
           data:{
             'update':{
-              'target':'item_position',
-              'id': vueArrange.clicked_item.id, //the clicked item in vueItems is the item to change position
-              'position_bfr': ui.item.position_bfr,
-              'position': ui.item.index(),
+              'target': target,
+              'id': id, 
+              'position_bfr': ui.item.position_bfr, //position before
+              'position': ui.item.index(), //position after
             }
           },
           success: function(data){
@@ -99,7 +117,8 @@ var vueItems = new Vue({
         'category':'',
         'printer':'',
         'price': 0,
-        'color':'#ffffff',
+        'background':'#ffffff',
+        'font':'#555555',
         },
       },
       {
@@ -130,7 +149,7 @@ var vueItems = new Vue({
     },
     'modify': function(){
       var form = this.formtypes[1];
-      form.price = parseFloat(form.price);
+      form.price = parseFloat(form.item.price);
       sendAjax({
         data:{
           'update':{
@@ -337,7 +356,8 @@ var vueExtra = new Vue({
       'text':'',
       'price':0
     },
-    'remarksform':{'text':''}
+    'remarksform':{'text':''},
+    'clicked_item': {}, //this will be link of an item
   },
   methods: {
     'add': function(target){
@@ -393,6 +413,9 @@ var vueExtra = new Vue({
           }
         },
       });
-    }
+    },
+    'clicked': function(item){
+      this.clicked_item = item;
+    },
   }
 });

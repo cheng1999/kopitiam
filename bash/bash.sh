@@ -1,5 +1,4 @@
 #!/bin/sh
-#tetet
 case "$1" in
 
   "delaylaunch")
@@ -11,6 +10,7 @@ case "$1" in
     echo "updating...."
     wget http://192.168.0.111/update.zip -O update.zip > /dev/null
     unzip -o update.zip >/dev/null
+    sh bash/update.sh
     echo "done"
     ;;
 

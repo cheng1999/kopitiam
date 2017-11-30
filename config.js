@@ -9,11 +9,11 @@ config.printers = [
   { name: "p2", ip:"192.168.192.168"}
 ];
 config.items = [
-  { name: "Kopi O", category: "drink", price: 1.2, printer: 'p1', color:'#ffffff'},
-  { name: "Kopi C", category: "drink", price: 1.8, printer: 'p1', color:'#ffffff'},
-  { name: "Kopi C peng", category: "drink", price: 2, printer: 'p1', color:'#ffffff' },
-  { name: "Cola", category: "tin", price: 2.2, printer: 'p1', color:'#ffffff' },
-  { name: "Garlic 嘿Toast", category: "toast", price: 2.5, printer:'p2', color:'#ffffff' },
+  { name: "Kopi O", category: "drink", price: 1.2, printer: 'p1', background:'#ffffff', font:'#555555'},
+  { name: "Kopi C", category: "drink", price: 1.8, printer: 'p1', background:'#ffffff', font:'#555555'},
+  { name: "Kopi C peng", category: "drink", price: 2, printer: 'p1', background:'#ffffff', font:'#555555'},
+  { name: "Cola", category: "tin", price: 2.2, printer: 'p1', background:'#ffffff', font:'#555555'},
+  { name: "Garlic 嘿Toast", category: "toast", price: 2.5, printer:'p2', background:'#ffffff', font:'#555555'},
 ];
 config.remarks = [
   { text: "- ais"},

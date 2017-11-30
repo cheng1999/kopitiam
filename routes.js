@@ -66,7 +66,7 @@ var routing = async (req,res)=>{
         resdata = dbop.remove(data.remove);
         if(data.remove.target == 'printers')printer.reloadPrinters();
       }
-      console.log(data);
+      //console.log(data);
       if(data.update){
         resdata = dbop.update(data.update);
       }

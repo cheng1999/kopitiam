@@ -48,9 +48,15 @@
               <input v-model="form.item.price" placeholder="price" type="number" step="0.01">
             </div>
           </div>
-          <div class="field">
-            <label>Color:</label>
-            <input v-model="form.item.color" id="background-color" type="color">
+          <div class="field two fields">
+            <div class="field">
+            <label>Background color:</label>
+            <input v-model="form.item.background" type="color">
+            </div>
+            <div class="field">
+            <label>Font color:</label>
+            <input v-model="form.item.font" type="color">
+            </div>
           </div>
         </div>
       <button v-if="form.type=='add'" v-on:click="add()" class="ui fluid button">Add</button>
@@ -75,7 +81,7 @@
           </td>
           <td>{{ item.category }}</td>
           <td>{{ item.printer }}</td>
-          <td>RM {{ item.price.toFixed(2) }}
+          <td>RM {{ Number(item.price).toFixed(2) }}
             <div v-on:click="remove(item)" class="ui red button right floated">delete</div>
             <div v-on:click="modify_modal(item)" class="ui green button right floated">modify</div>
           </td>
@@ -85,8 +91,9 @@
   </div>
 
   <div id="arrange" data-tab="arrange" class="ui tab segment">
-  <!-- from below is a copy from a part in index.html, the main page of the program --!>
-  <div class="eight wide column" style="width:49%!important;padding-top:0!important">
+  <!-- from below is a copy from a part in index.html, the main page of the program, but have some different --!>
+  <!-- different: width=60% !-->
+  <div class="eight wide column" style="width:100%!important;padding-top:0!important">
     <div class="ui grid">
       <div class="doubling four column row category nopadding nomargin">
         <div v-for="category in datalink.categories" class="ui fluid button column nopadding nomargin">
@@ -95,15 +102,21 @@
           </div>
         </div>
       </div>
-      <div id="draggable_items" class="doubling four column row overflowhandler" style="padding-bottom:900px!important">
-      <!-- the different btw original is here: id=draggable , and onclick=clicked(item) --!>
+      <!-- 
+        id=draggable_items
+        style add:
+        padding-right:200px , reserve additional space for mobile to scroll because draggable items make items' area unscrollable. 
+        class add: drag_handle--!>
+      <div id="draggable_items" class="doubling four column row overflowhandler drag_handle" style="padding-bottom:900px!important;padding-right:200px!important">
 
-      <!-- <div v-for="item in items" v-on:click="order(item)" class="ui big button column nomargin" v-bind:style="'background-color:' + item.color"  style="min-height:5em"> !-->
-      <div v-for="item in items" v-on:mouseDown="clicked(item)" class="ui big button column nomargin" v-bind:style="'background-color:' + item.color"  style="min-height:5em">
-            {{ item.name }} <br> RM {{ Number(item.price).toFixed(2) }}
-            <a v-on:click="" class="ui fluid label center bottom attached" >
-              <i class="small plus icon detail"></i>
-            </a>
+      <!-- v-on:mouseDown=clicked(item) --!>
+      <div v-for="item in items" class="ui column nomargin nopadding" v-on:mouseDown="clicked(item)" >
+        <a v-on:click="order(item)" class="ui fluid big button" v-bind:style="'background-color:' + item.background + ';color:' + item.font" style="min-height:5em">
+          {{ item.name }} <br> RM {{ Number(item.price).toFixed(2) }}
+        </a>
+        <a v-on:click="extra(item)" class="ui fluid label center aligned grid bottom attached" >
+          <i class="small plus icon detail"></i>
+        </a>
        </div>
       </div>
     </div>
@@ -184,12 +197,14 @@
       <table class="ui celled table">
         <thead>
           <tr>
+            <th></th>
             <th>Text</th>
             <th>Price</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="extra in datalink.extra">
+        <tbody id="draggable_extra">
+          <tr v-for="extra in datalink.extra" v-on:mouseDown="clicked(extra)">
+            <td class="drag_handle"><i class="resize vertical icon"></i></td>
             <td>{{ extra.text }}</td>
             <td>
               RM {{ extra.price.toFixed(2) }}
@@ -211,10 +226,14 @@
       <div v-on:click="add('remarks')" class="ui fluid button">Add</div>
       <table class="ui celled table">
           <thead>
-            <tr><th>Text</th></tr>
+            <tr>
+              <th></th>
+              <th>Text</th>
+            </tr>
           </thead>
-          <tbody>
-            <tr v-for="remark in datalink.remarks">
+          <tbody id="draggable_remarks">
+            <tr v-for="remark in datalink.remarks" v-on:mouseDown="clicked(remark)">
+              <td class="drag_handle"><i class="resize vertical icon"></i></td>
               <td>
                 {{ remark.text }}
                 <div v-on:click="remove('remarks', remark.id)" class="ui red button right floated">delete</div>
