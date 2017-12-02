@@ -106,15 +106,19 @@
         id=draggable_items
         style add:
         padding-right:200px , reserve additional space for mobile to scroll because draggable items make items' area unscrollable. 
-        class add: drag_handle--!>
-      <div id="draggable_items" class="doubling four column row overflowhandler drag_handle" style="padding-bottom:900px!important;padding-right:200px!important">
-
-      <!-- v-on:mouseDown=clicked(item) --!>
-      <div v-for="item in items" class="ui column nomargin nopadding" v-on:mouseDown="clicked(item)" >
-        <a v-on:click="order(item)" class="ui fluid big button" v-bind:style="'background-color:' + item.background + ';color:' + item.font" style="min-height:5em">
+      --!>
+      <div id="draggable_items" class="doubling four column row overflowhandler" style="padding-bottom:900px!important;padding-right:200px!important">
+      
+      <div v-for="item in items" class="ui column nomargin nopadding">
+        <!--
+          v-on:mouseDown=clicked(item)
+          class add:"drag_handle"
+        --!>
+        <a v-on:mouseDown="clicked(item)" class="ui fluid big button drag_handle" v-bind:style="'background-color:' + item.background + ';color:' + item.font" style="min-height:5em">
           {{ item.name }} <br> RM {{ Number(item.price).toFixed(2) }}
         </a>
-        <a v-on:click="extra(item)" class="ui fluid label center aligned grid bottom attached" >
+        <!-- v-on:click=vueItems.modify_modal(item); class add:"drag_handle" --!>
+        <a v-on:click="vueItems.modify_modal(item)" class="ui fluid label center aligned grid bottom attached" >
           <i class="small plus icon detail"></i>
         </a>
        </div>

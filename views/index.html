@@ -80,7 +80,7 @@
 <div class="ui grid">
   <div id="checkorder" class="six wide column nopadding">
     <div class="ui huge label fluid">Ordered:
-      <a class="ui green">RM{{ orderlink.totalprice.toFixed(2) }}</a>
+      <a class="ui green">RM{{ Number(orderlink.totalprice).toFixed(2) }}</a>
     </div>
     <table class="ui fixed structured table nomargin">
       <thead>
@@ -103,7 +103,7 @@
               {{ order.remarks.join() }} {{ order.remarks.join()!==''?',':'' }} {{ order.extra.map(function(extra){return extra.text}).join() }}
             </a>
           </td>
-          <td colspan="2">{{ order.price.toFixed(2) }}</td>
+          <td colspan="2">{{ Number(order.price).toFixed(2) }}</td>
           <td v-on:click="add(order)" colspan="1" class="ui center aligned fluid button"><i class="small plus icon nomargin"></i></td>
         </tr>
       </tbody>

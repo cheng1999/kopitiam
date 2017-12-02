@@ -91,7 +91,7 @@ var rewrap = (target, data)=>{
         'id': data.$loki,
         'name': data.name,
         'category': data.category,
-        'price': data.price,
+        'price': Number(data.price),
         'printer': data.printer,
         'font': data.font,
         'background': data.background,
@@ -283,9 +283,14 @@ module.exports.remove = (data)=>{
     case 'items':
       var resdata = items.chain().find({ '$loki': data.id });
       //if there is only one record with this category and was prepared to remove, then remove that category too
-      var data_item_category = items.findOne({ '$loki': data.id }).category;
-      if(items.find({ 'category': data_item_category }).length === 1){
-        categories.chain().find({'name': data_item_category}).remove();
+      var item = items.findOne({ '$loki': data.id });
+      var list = items.find({ 'category': item.category }); 
+      if(list.length == 1){ //number another items which is same category
+        categories.chain().find({'name': item.category}).remove();
+      }else{
+        //shift the items position to replace the removed item
+        //change to last position then remove
+        shift(items, item, list, list.length);
       }
       break;
     case 'printers':
@@ -296,9 +301,15 @@ module.exports.remove = (data)=>{
       break;
     case 'extra':
       var resdata = extra.chain().find({ '$loki': data.id });
+      var item = extra.findOne({ '$loki': data.id });
+      var list = extra.find(); 
+      shift(extra, item, list, list.length);
       break;
     case 'remarks':
       var resdata = remarks.chain().find({ '$loki': data.id });
+      var item = remarks.findOne({ '$loki': data.id });
+      var list = remarks.find(); 
+      shift(remarks, item, list, list.length);
       break;
     default:
       throw new Error("invalid target");
@@ -317,23 +328,30 @@ module.exports.update = (data)=>{
       item.category = data.item.category;
       item.printer = data.item.printer;
       item.price = data.item.price;
-      item.color = data.item.color;
+      item.background = data.item.background;
+      item.font = data.item.font;
       items.update(item);
       break;
     case 'item_position':
       var item = items.findOne({ '$loki': data.id });
       var list = items.find({ 'category': item.category }); //item which is same category
-      shift(items, item, list, data.position, data.position_bfr);
+      //reset_po(items, item, list, data.position);
+      // just found out that sort position is not good in ux,
+      // must use the way swap later, but now do other stuffs first .-.
+      //**DAMN mantaince
+      shift(items, item, list, data.position);
       break;
     case 'remark_position':
       var item = remarks.findOne({ '$loki': data.id });
       var list = remarks.find();
-      shift(remarks, item, list, data.position, data.position_bfr);
+      //reset_po(remarks, item, list, data.position);
+      shift(remarks, item, list, data.position);
       break;
     case 'extra_position':
       var item = extra.findOne({ '$loki': data.id });
       var list = extra.find();
-      shift(extra, item, list, data.position, data.position_bfr);
+      //reset_po(extra, item, list, data.position);
+      shift(extra, item, list, data.position);
       break;
     default:
       throw new Error("invalid target");
@@ -343,7 +361,8 @@ module.exports.update = (data)=>{
 };
 
 //shifting all position
-var shift = (collection,item,list,position,position_bfr)=>{
+var shift = (collection,item,list,position)=>{
+  var position_bfr = item.position;
   for(var c=0; c<list.length; c++){
     //console.log(list[c]+':'+list[c].position);
     if(position >= list[c].position &&
@@ -369,3 +388,15 @@ var shift = (collection,item,list,position,position_bfr)=>{
 
 };
 
+
+/*
+var reset_po = (collection,item,list,position)=>{
+  for(var c=0; c<list.length; c++){
+    list[c].position = c;
+  }
+  for(var c=0; c<list.length; c++){
+    collection.update(list[c]);
+  }
+
+}
+*/
