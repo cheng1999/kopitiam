@@ -15,6 +15,8 @@ var categories, items, remarks, extra, log, tablenumber;
 var config = require(appROOT+'/config.js');
 
 var dbloaded = false;
+//this must be function databaseInitialize(), not databaseInitialize = ()=>{}
+//because new loki() won't work with that.
 function databaseInitialize() {
   categories = db.getCollection('categories');
   items = db.getCollection('items');
@@ -231,8 +233,14 @@ module.exports.getstatistics = (startdate,enddate,periodmin)=>{
   return data;
 }
 
+/*
 module.exports.getPrinter = (itemid)=>{
-    return items.findOne({'$loki':itemid}).printer;
+  var printername = items.findOne({'$loki':itemid}).printer;
+  return printers.findOne({'name':printername});
+};
+*/
+module.exports.getPrinter = (printername)=>{
+  return printers.findOne({'name':printername});
 };
 
 /* write into database */

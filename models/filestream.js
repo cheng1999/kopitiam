@@ -3,7 +3,7 @@ const fs = require('fs'),
 
 module.exports.writefile = async(path, data)=>{
   var writeFile = promisify(fs.writeFile);
-  await readFile(path, data);
+  await writeFile(path, data);
   return;
 }
 

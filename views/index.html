@@ -31,7 +31,7 @@
 <body style="overflow:hidden">
 <button class="ui big button" onclick="back()">Back</button>
 <button class="ui big button right floated" onclick="location.reload()">Refresh</button>
-<div id="tablenum" class="ui segment layout">
+<div id="tablenum" class="ui segment layout overflowhandler" style="padding-bottom:900px!important">
   <div class="ui grid container">
     <div v-for="table in tablenumber" class="four wide column">
       <button v-on:click="selectnumber(table.number)" class="ui fluid huge button">{{table.number}}</button>
@@ -136,9 +136,12 @@
 </div>
 </div>
 
+<canvas id="receipt" class="ui modal"></canvas>
 <script src="include/jquery-3.2.1.min.js"></script>
 <script src="include/vue.min.js"></script>
 <script src="include/semantic.min.js"></script>
+<script src="scripts/receipt.js"></script>
+<script src="scripts/toReceipt.js"></script>
 <script src="scripts/main.js"></script>
 </body>
 </html>

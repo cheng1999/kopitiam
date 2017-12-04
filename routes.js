@@ -42,9 +42,10 @@ var routing = async (req,res)=>{
       var data = await request.getdata(req);
       data = JSON.parse(data);
       //console.log(data);
-      dbop.log(data);
       try{
-        await printer.print(data);
+        await printer.print(data.images);
+        //print first then log
+        dbop.log(data);
       }catch(err){
         res.writeHead(500,ctxtype.html);
         console.error(err);
@@ -60,11 +61,11 @@ var routing = async (req,res)=>{
       var resdata;
       if(data.add){
         resdata = dbop.add(data.add);
-        if(data.add.target == 'printers')printer.reloadPrinters();
+        //if(data.add.target == 'printers')printer.reloadPrinters();
       }
       if(data.remove){
         resdata = dbop.remove(data.remove);
-        if(data.remove.target == 'printers')printer.reloadPrinters();
+        //if(data.remove.target == 'printers')printer.reloadPrinters();
       }
       //console.log(data);
       if(data.update){

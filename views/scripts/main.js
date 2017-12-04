@@ -7,10 +7,13 @@ var data = {
       'tablenumber': '',
       'totalprice': 0,
       'items': [],
+      'images': [], //receipt image
     },
     resetorder = JSON.parse(JSON.stringify(order));//make a clone for reset after order
 
-  
+var canvas=  document.getElementById('receipt');
+var receipt = new Receipt(canvas);
+var toReceipt = new ToReceipt(receipt);
 
 $.getJSON('init', function(thisdata) {
   //data is the JSON string
@@ -57,17 +60,6 @@ function init(){
   //});
 }
 
-function sendorder(){
-  
-  var backuporder = JSON.parse(JSON.stringify(order));
-  order.items.forEach(function(item){
-    //reset counting of item
-    //item.itemlink.count=0;
-    //delete **itemlink which is useless for serverside before sending data
-    delete item.itemlink;
-    
-  });
-
   //sort the items
   //referrence: http://www.c-sharpcorner.com/UploadFile/fc34aa/sort-json-object-array-based-on-a-key-attribute-in-javascrip/
   //Comparer Function  
@@ -80,12 +72,28 @@ function sendorder(){
       }  
       return 0;  
     }; 
-  }  
-  order.items.sort(GetSortOrder("name"));
+  } 
+
+function sendorder(){
+  
+  var backuporder = JSON.parse(JSON.stringify(order));
+
+  //sort order
+  order.items.sort(GetSortOrder("category"));
   order.items.forEach(function(item){
     item.extra.sort(GetSortOrder("text"));
     item.remarks.sort();
   });
+
+  order.items.forEach(function(item){
+    //reset counting of item
+    //item.itemlink.count=0;
+    //delete **itemlink which is useless for serverside before sending data
+    delete item.itemlink;
+    
+  });
+
+  order.images = toReceipt.getImages(order);
 
   //send order
   $.ajax({
@@ -95,7 +103,8 @@ function sendorder(){
       dataType: 'html',
       async: false,
       success: function(data) {
-        toggleto('#home','#tablenum');
+        //toggleto('#home','#tablenum');
+        init();
       },
       error: function (data) {
         order = backuporder;
@@ -203,6 +212,9 @@ var extraorder = new Vue({
       this.remarks.push(remark);
     },
     'order': function(){
+      this.extra.sort(GetSortOrder('text'));
+      this.remarks.sort()
+
       var order_tocheck = { 
         'count': 1,
         'itemlink': this.itemlink,
@@ -210,7 +222,8 @@ var extraorder = new Vue({
         'name': this.itemlink.name,
         'remarks': this.remarks,
         'extra': this.extra,
-        'price': this.itemlink.price + this.addprice
+        'price': this.itemlink.price + this.addprice,
+        'printer': this.itemlink.printer
       };
       if(!checkrepeated(order_tocheck)){
         this.orderlink.items.push(order_tocheck);
@@ -281,7 +294,8 @@ var cat = new Vue({
         'name': item.name,
         'remarks': [],
         'extra': [],
-        'price': item.price
+        'price': item.price,
+        'printer': item.printer
       };
       if(!checkrepeated(order_tocheck)){
         order.items.push(order_tocheck);

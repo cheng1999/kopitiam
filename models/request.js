@@ -1,15 +1,15 @@
 const querystring = require('querystring');
 
 module.exports.getdata = (req) => {
-  return new Promise(function(resolve, reject){
+  return new Promise((resolve, reject)=>{
     var data = [];
-    req.on('data', function(chunk){ //data metamorphosing...
+    req.on('data', (chunk)=>{ //data metamorphosing...
       data += chunk;
     })
-    req.on('end', function(){ //data metamorphosing completed
+    req.on('end', ()=>{ //data metamorphosing completed
       resolve(data);
     });
-    req.on('error', function(err){
+    req.on('error', (err)=>{
       reject(err);
     });
   });
