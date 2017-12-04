@@ -127,8 +127,9 @@ class Receipt{
     this.newline();
   }
   clear(){
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-    canvas.height = 0;
+    //this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+    this.y = 0; //height set for new line, y-position of text
+    this.canvas.height = 0;
     //canvas.width = this.config.width;
   }
 }

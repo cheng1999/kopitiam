@@ -59,8 +59,8 @@ ToReceipt.prototype.getImages = function(data){
       'printer': printers[pnow],
       'image': canvas.toDataURL().substr('data:image/png;base64,'.length)
     });
-
     receipt.clear();
+
   }
 
   //return images.replace('data:image/png;base64,','');
