@@ -43,14 +43,14 @@ module.exports.print = async (images)=>{
       });
       //console.log('tcp://'+printer_data.ip+':'+printer_data.port);
 
-      require('fs').writeFile('p'+c+'.png', Buffer.from(images[c].image, 'base64'), function(err){});
+      //require('fs').writeFile('p'+c+'.png', Buffer.from(images[c].image, 'base64'), function(err){});
       if(! await checkPrinter()){
         throw new Error("cannot connect to printer");
       }
 
-      //await printImageBuffer( Buffer.from(images[c].image, 'base64') );
-      //printer.cut();
-      //await printout();
+      await printImageBuffer( Buffer.from(images[c].image, 'base64') );
+      printer.cut();
+      await printout();
 
     }
 }
