@@ -76,6 +76,7 @@ function init(){
 
 function sendorder(){
   
+  //recover order if error
   var backuporder = JSON.parse(JSON.stringify(order));
 
   //sort order
@@ -95,16 +96,19 @@ function sendorder(){
 
   order.images = toReceipt.getImages(order);
 
+  var orderclone = JSON.parse(JSON.stringify(order));
+  init();
+
   //send order
   $.ajax({
       url: 'order',
       type: 'POST',
-      data: JSON.stringify(order),
+      data: JSON.stringify(orderclone),
       dataType: 'html',
-      async: false,
+      //async: false,
       success: function(data) {
         //toggleto('#home','#tablenum');
-        init();
+        //init();
       },
       error: function (data) {
         order = backuporder;

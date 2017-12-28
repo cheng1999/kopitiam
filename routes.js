@@ -43,9 +43,10 @@ var routing = async (req,res)=>{
       data = JSON.parse(data);
       //console.log(data);
       try{
+        dbop.log(data);
         await printer.print(data.images);
         //print first then log
-        dbop.log(data);
+        //dbop.log(data);
       }catch(err){
         res.writeHead(500,ctxtype.html);
         console.error(err);

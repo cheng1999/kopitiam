@@ -7,66 +7,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
   <link rel="stylesheet" type="text/css" href="include/calendar.min.css">
-  <link rel="stylesheet" type="text/css" href="scripts/statistics.css">
+  <!-- <link rel="stylesheet" type="text/css" href="scripts/statistics.css"> --!>
+  <link rel="stylesheet" type="text/css" href="scripts/main.css">
   <title>Kopitiam</title>
 </head>
 
 <body class="ui segment">
 
-<div class="ui ">
-<div class="chartfilter wholescreen">
-  <div class="ui input calendar" id="startdate">
+<div>
+  <div class="ui input calendar form_startdate">
     <input type="text" placeholder="Date/Time">
   </div>
   <label>to</label>
-  <div class="ui input calendar" id="enddate">
+  <div  class="ui input calendar form_enddate">
     <input type="text" placeholder="Date/Time">
   </div>
   <label>Period:</label>
-  <select id="periodlist" class="ui dropdown">
+  <select class="ui dropdown form_period">
     <!-- value is in unit minute !-->
     <option value="30">30 Minutes</option>
     <option value="60">1 Hour</option>
     <option value="120">2 Hour</option>
+    <option value="180" selected="selected">3 Hour</option>
     <option value="360">6 Hour</option>
     <option value="720">12 Hour</option>
     <option value="1440">Day</option>
     <option value="10080">Weeks</option>
     <option value="43800">Month</option>
   </select>
-  <br>
-  <label>Categories:</label>
-  <div id="selectcategories" class="ui fluid multiple search selection dropdown">
-    <input name="tags" type="hidden">
-    <i class="dropdown icon"></i>
-    <div class="default text">Categories</div>
-    <div class="menu">
-      <div v-on:click="" class="item" data-value="">all</div>
-      <div v-for="category in menu" v-bind:data-value="category.id" class="item">{{ category.name }}</div>
-    </div>
-  </div>  
-  <div id="summary">
-    <label class="ui header">Summary</label>
-    <label>Total Sell: RM {{ totalprice.toFixed(2) }}</label>
+  <label>Target:</label>
+  <select id="form_target_options" class="ui dropdown form_target">
+    <option class="item" data-value="Summary">Summary</option>
+    <option v-for="option in options" v-bind:data-value="option.name" class="item">{{ option }}</option>
+  </select>  
+  <label>Show in:</label>
+  <select class="ui dropdown form_showin">
+    <option class="item" data-value="Price">Price</option>
+    <option class="item" data-value="Count">Count</option>
+  </select>  
 
-  </div>
   <div onclick="loaddata()" class="ui button">Load</div>
 </div>
-  <div onclick="togglechartfilter(this)" class="ui small button">Hide</div>
-  <div onclick="makechart()" class="ui small button">Reload</div>
-<div class='wholescreen'>
-  <canvas id="chart" width="600" height="400"></canvas>
+<div class="ui segment overflowhandler-x">
+  <table id="data" class="ui celled table  ">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th v-for="date in dates">{{ new Date(date).toLocaleTimeString() }}</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="item in table">
+        <td>{{ item.name }}</td>
+        <td v-for="column in item.column">{{ column }}</td>
+        <td>{{ item.total }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
-</div>
+
 <script src="include/jquery-3.2.1.min.js"></script>
 <script src="include/vue.min.js"></script>
 <script src="include/semantic.min.js"></script>
 <script src="include/calendar.min.js"></script>
+<!--
 <script src="include/Chart.bundle.min.js"></script>
 <script src="include/hammer.min.js"></script>
 <script src="include/chartjs-plugin-zoom.min.js"></script>
-<script src="scripts/statistics.js"></script>
 <script src="scripts/chartjs_rewrap.js"></script>
+!-->
+<script src="include/tablesort.min.js"></script>
+<script src="scripts/statistics.js"></script>
 </body>
 </html>
 

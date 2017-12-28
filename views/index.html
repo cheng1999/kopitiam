@@ -8,6 +8,7 @@
   <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
   <link rel="stylesheet" type="text/css" href="scripts/main.css">
   <!-- copy from https://www.favicon-generator.org/ !-->
+  <!--
     <link rel="apple-touch-icon" sizes="57x57" href="favicon/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="favicon/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="favicon/apple-icon-72x72.png">
@@ -25,12 +26,14 @@
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="favicon/ms-icon-144x144.png">
     <meta name="theme-color" content="#ffffff">
+    --!>
   <title>Kopitiam</title>
 </head>
 
 <body style="overflow:hidden">
-<button class="ui big button" onclick="back()">Back</button>
-<button class="ui big button right floated" onclick="location.reload()">Refresh</button>
+<button class="ui small button" onclick="back()">Back</button>
+<button class="ui small button right floated" onclick="location.reload()">Check</button>
+<button class="ui small button right floated" onclick="location.reload()">Refresh</button>
 <div id="tablenum" class="ui segment layout overflowhandler" style="padding-bottom:900px!important">
   <div class="ui grid container">
     <div v-for="table in tablenumber" class="four wide column">
@@ -75,7 +78,8 @@
   </div>
   <button v-on:click="order()" class="ui massive green fluid button rightbottom">Add</button>
 </div>
-
+<div id="orders_queue" class="ui segment layout nopadding nomargin">
+</div>
 <div id="home" class="ui segment layout nopadding nomargin">
 <div class="ui grid">
   <div id="checkorder" class="six wide column nopadding">
@@ -87,7 +91,7 @@
         <tr>
           <th colspan="1"></th>
           <th colspan="4">Name</th>
-          <th colspan="2" >Price(RM)</th>
+          <th colspan="2">Price(RM)</th>
           <th colspan="1"></th>
         </tr>
       </thead>
@@ -112,13 +116,12 @@
   </div>
   <div onclick="sendorder()" class="ui green fluid huge rightbottom button" style="width:37%">Send</div>
 
+
   <div id="menu" class="ten wide column" style="width:62%!important;padding-top:0!important">
     <div class="ui grid">
       <div class="doubling four column row category nopadding nomargin">
-        <div v-for="category in datalink.categories" class="ui fluid button column nopadding nomargin">
-          <div v-on:click="showcat(category)" class="ui fluid big button">
-            {{ category.name }}
-          </div>
+        <div v-on:click="showcat(category)" v-for="category in datalink.categories" class="ui fluid button column nopadding nomargin">
+          {{ category.name }}
         </div>
       </div>
       <div class="doubling four column row overflowhandler" style="padding-bottom:900px!important">

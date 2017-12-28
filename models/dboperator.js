@@ -196,21 +196,20 @@ module.exports.getstatistics = (startdate,enddate,periodmin)=>{
   //all array's index like table's column position
   var data= {
     'dates':[],
-    'prices':[],
     'items': [],
   };
 
   while(startdate-periodmin*60*1000<enddate){
     data.dates.push(new Date(startdate));
-    data.prices.push(0);
     //add minutes, it will auto conver to hours if up to 60 min (60 min per hour)
     startdate.setMinutes(startdate.getMinutes() + periodmin);
   }
 
   var allitems = items.find();
+  //var temp=log.find();
+  //console.log(temp[temp.length-1]);
   allitems.forEach((item)=>{
-    var itemlogdata = {'name': item.name, 'counts':[]};
-    var totalmakeprice = 0;
+    var itemlogdata = {'category': item.category, 'name': item.name, 'prices': [], 'counts':[]};
     //they all have same length and index, like table: every row have same number of column
     for(var index=0; index<data.dates.length-1; index++){
       //console.log(enddate);
@@ -222,8 +221,10 @@ module.exports.getstatistics = (startdate,enddate,periodmin)=>{
       var itemlogs = log.find({ 'itemid': item.$loki, date: { $between: [date1,date2] } });
       //console.log(itemlogs);
       itemlogdata.counts[index]=itemlogs.length;
+      itemlogdata.prices[index]=0;
       itemlogs.forEach((itemlog)=>{
-        data.prices[index]+=itemlog.price;
+        itemlogdata.prices[index]+=itemlog.price;
+        //itemlogdata.prices[index]+=parseFloat(itemlog.price.toFixed(2));
       });
     }
     data.items.push(itemlogdata);
@@ -249,7 +250,7 @@ module.exports.log = (data)=>{
   //type, date
   data.items.forEach((item)=>{
     for(c=0; c<item.count; c++){
-      log.insert({'itemid': item.id, 'price': item.price ,'date': new Date});
+      log.insert({'itemid': item.id, 'price': parseFloat(item.price.toFixed(2)) ,'date': new Date});
     }
   });
 }
