@@ -1,180 +1,166 @@
-const loki = require('lokijs'),
-      lfsa = require('lokijs/src/loki-fs-structured-adapter');
+const dbBuilt = require('fs').existsSync(appROOT+'/db.sqlite'),//variable for check exists of database
+  dblite = require('dblite');
+  //dblite.bin = appROOT+'/sqlite/sqlite3.exe';
+var db = dblite(appROOT+'/db.sqlite', '-header');
 
-var db = new loki(appROOT+'/db/kopitiam.db',{
-  adapter : new lfsa(),
-  autoload: true,
-  autoloadCallback: databaseInitialize,
-  autosave: true, 
-  autosaveInterval: 4000
+//db.on('close', function (code) {});// by default, it logs 'bye bye', but I want it to shut up
+
+db.on('close', function (code) {
+  // by default, it logs "bye bye"
+  // invoked once the database has been closed
+  // and every statement in the queue executed
+  // the code is the exit code returned via SQLite3
+  // usually 0 if everything was OK
+  console.log('safe to get out of here ^_^_');
 });
 
+/* some functions */
+var query = (arg1,arg2,arg3)=>{//db.query() have maximun 4 arguments, last one for callback
+    return new Promise(function(resolve,reject){
+
+        var callback = function(err,rows){ //the args 4, or the last argements
+            if(err) reject(err);
+            else resolve(rows);
+        }
+        try{
+            if(arg3) db.query(arg1,arg2,arg3,callback);
+            else if(arg2) db.query(arg1,arg2,callback);
+            else if(arg1) db.query(arg1,callback);
+        }catch(err){
+            reject(err);
+        }
+    });
+}
+
+var query_count = (query_result)=>{
+    var listcount = query_result[0].count;
+    return listcount!==undefined ? parseInt(listcount) : 0;
+}
+
 //initial
-var categories, items, remarks, extra, log, tablenumber;
+module.exports = ()=>{
+  //turn the foreign keys on
+  db.query('PRAGMA foreign_keys = ON;',function(){});//add function at the back to prevent it print out result on console
 
-var config = require(appROOT+'/config.js');
+  //build database if not yet
+  if(!dbBuilt){
+    //categories
+    db.query('\
+      CREATE TABLE categories (\
+        id INTEGER PRIMARY KEY AUTOINCREMENT,\
+        name VARCHAR(255) UNIQUE NOT NULL\
+      )'
+    );
 
-var dbloaded = false;
-//this must be function databaseInitialize(), not databaseInitialize = ()=>{}
-//because new loki() won't work with that.
-function databaseInitialize() {
-  categories = db.getCollection('categories');
-  items = db.getCollection('items');
-  remarks = db.getCollection('remarks');
-  extra = db.getCollection('extra');
-  log = db.getCollection('log');
-  printers = db.getCollection('printers');
-  tablenumber = db.getCollection('tablenumber');
-  
-  if(categories === null){
-    categories = db.addCollection('categories');
-    config.categories.forEach( (x)=>{
-      x.position = categories.find().length;
-      categories.insert(x);
-    });
-  }
-  if(items === null){
-    items = db.addCollection('items');
-    //insert configured items
-    config.items.forEach( (x)=> {
-      //default position
-      x.position = items.find({ 'category': x.category }).length;
-      items.insert(x)
-    });
-  }
-  if(remarks === null){
-    remarks = db.addCollection('remarks');
-    config.remarks.forEach( (x)=> {
-      x.position = remarks.find().length;
-      remarks.insert(x);
-    });
-  }
-  if(extra === null){
-    extra = db.addCollection('extra');
-    config.extra.forEach( (x)=> {
-      x.position = extra.find().length;
-      extra.insert(x);
-    });
-  }
-  if(log === null){
-    log = db.addCollection('log');
-  }
-  if(printers === null){
-    printers = db.addCollection('printers');
-    config.printers.forEach( (x)=>{
-      printers.insert(x);
-    });
-  }
-  if(tablenumber === null){
-    tablenumber = db.addCollection('tablenumber');
-    config.tablenumber.forEach( (x)=>{
-      tablenumber.insert({
-        'number': x
-      });
-    });
-  }
+    //items
+    db.query('\
+      CREATE TABLE items (\
+        id INTEGER PRIMARY KEY AUTOINCREMENT,\
+        name VARCHAR(255) NOT NULL,\
+        category VARCHAR(255) NOT NULL,\
+        price DOUBLE NOT NULL,\
+        printer VARCHAR(255) NOT NULL,\
+        font VARCHAR(7) NOT NULL,\
+        background VARCHAR(7) NOT NULL,\
+        position INTEGER\
+      )'
+    );
+ 
 
-  dbloaded = true;
+    //remarks
+    db.query('\
+      CREATE TABLE remarks (\
+        id INTEGER PRIMARY KEY AUTOINCREMENT,\
+        text VARCHAR(255) NOT NULL,\
+        position INTEGER\
+      )'
+    );
+
+    //extra
+    db.query('\
+      CREATE TABLE extra (\
+        id INTEGER PRIMARY KEY AUTOINCREMENT,\
+        text VARCHAR(255) NOT NULL,\
+        price DOUBLE NOT NULL,\
+        position INTEGER\
+      )'
+    );
+
+    //tablenumber
+    db.query('\
+      CREATE TABLE tablenumber (\
+        id INTEGER PRIMARY KEY AUTOINCREMENT,\
+        number VARCHAR(255) NOT NULL\
+      )'
+    );
+
+    //printers
+    db.query('\
+      CREATE TABLE printers (\
+        id INTEGER PRIMARY KEY AUTOINCREMENT,\
+        name VARCHAR(255) UNIQUE NOT NULL,\
+        ip VARCHAR(15) NOT NULL,\
+        port INTEGER NOT NULL\
+      )'
+    );
+
+    //log
+    db.query('\
+      CREATE TABLE log (\
+        itemid INTEGER NOT NULL,\
+        price DOUBLE NOT NULL,\
+        date TEXT NOT NULL\
+      )'
+    );
+
+    //save data
+    db.query('\
+      CREATE TABLE savedata (\
+        selector TEXT NOT NULL,\
+        value TEXT NOT NULL\
+      )'
+    );
+
+    db.query('INSERT INTO savedata VALUES(?,?)',
+      [
+        'queuenumber',
+        JSON.stringify({'number': 0, 'date': new Date().getDate()})
+      ]);
+
+    db.query('INSERT INTO savedata VALUES(?,?)',
+      [
+        'lastbackup',
+        JSON.stringify({'time': new Date().getTime()})
+      ]);
+  }
 }
 
-//rewrap data for client
-//target is rewrap data type
-//data was selected from database
-var rewrap = (target, data)=>{
-  switch(target){
-    case 'category':
-      return {
-        'id': data.$loki,
-        'name': data.name,
-        'position': data.position
-      };
-    case 'items':
-      return {
-        'id': data.$loki,
-        'name': data.name,
-        'category': data.category,
-        'price': Number(data.price),
-        'printer': data.printer,
-        'font': data.font,
-        'background': data.background,
-        'position': data.position,
-      };
-    case 'remarks':
-      return {
-      'id': data.$loki,
-      'text': data.text
-      };
-    case 'extra':
-      return {
-        'id': data.$loki,
-        'text': data.text,
-        'price': data.price
-      };
-    case 'tablenumber':
-      return {
-        'id': data.$loki,
-        'number': data.number,
-      };
-    case 'printers':
-      return {
-        'id': data.$loki,
-        'name': data.name,
-        'ip': data.ip,
-        'port': data.port
-      };
-    default:
-      throw new Error('invalid target');
-  }
-}
 
 /* get from database */
-module.exports.autoloadCallback = (callback)=>{
-  setTimeout(()=>{
-    if(dbloaded)callback();
-    else{this.autoloadCallback(callback);}
-  }, 3000);
-}
 
 var initJson = null, needtoRefresh = true;
-module.exports.getInitJson = ()=>{
-  //if already in memory, then not need take reload from database anymore
-  if(initJson & !needtoRefresh){
+module.exports.getInitJson = async ()=>{
+  //if already in memory, then not need reload from database anymore
+  if(initJson && !needtoRefresh){
     return initJson;
   }
   needtoRefresh = false;
 
-  var categories_list = [],
+  var rows,
+      categories_list = [],
       items_list = [],
       remarks_list = [],
       extra_list = [],
       tablenumber_list = [],
       printers_list = [];
 
-  var temp = categories.find();
-  temp.forEach((data)=>{
-    categories_list.push(rewrap('category', data));
-  });
-  var temp = items.chain().find().simplesort('position').data();
-  temp.forEach((data)=>{
-    items_list.push(rewrap('items', data));
-  });
-  var temp = remarks.chain().find().simplesort('position').data();
-  temp.forEach((data)=>{
-    remarks_list.push(rewrap('remarks', data));
-  });
-  var temp = extra.chain().find().simplesort('position').data();
-  temp.forEach((data)=>{
-    extra_list.push(rewrap('extra', data));
-  });
-  var temp = tablenumber.chain().find().simplesort('number').data();
-  temp.forEach((data)=>{
-    tablenumber_list.push(rewrap('tablenumber', data));
-  });
-  var temp = printers.find();
-  temp.forEach((data)=>{
-    printers_list.push(rewrap('printers', data));
-  });
 
+  categories_list = await query('SELECT * FROM categories');
+  items_list = await query('SELECT * FROM items ORDER BY position ASC', { 'price': Number });
+  remarks_list = await query('SELECT * FROM remarks ORDER BY position ASC');
+  extra_list = await query('SELECT * FROM extra ORDER BY position ASC', { 'price': Number });
+  tablenumber_list = await query('SELECT * FROM tablenumber ORDER BY number ASC'); 
+  printers_list = await query('SELECT * FROM printers');
 
   initJson = {
     'categories': categories_list,
@@ -188,7 +174,8 @@ module.exports.getInitJson = ()=>{
   return initJson;
 };
 
-module.exports.getstatistics = (startdate,enddate,periodmin)=>{
+
+module.exports.getstatistics = async (startdate,enddate,periodmin)=>{
   //this become string when json was stringified for transfering over network 
   startdate = new Date(Date.parse(startdate));
   enddate = new Date(Date.parse(enddate));
@@ -205,21 +192,27 @@ module.exports.getstatistics = (startdate,enddate,periodmin)=>{
     startdate.setMinutes(startdate.getMinutes() + periodmin);
   }
 
-  var allitems = items.find();
+  //var allitems = items.find();
+  var allitems = await query('SELECT id,name,category FROM items');
+  var tempcount=0;
   //var temp=log.find();
   //console.log(temp[temp.length-1]);
-  allitems.forEach((item)=>{
+  //allitems.forEach((item)=>{
+  for (var c=0; c<allitems.length; c++){
+    
+    var item=allitems[c];
     var itemlogdata = {'category': item.category, 'name': item.name, 'prices': [], 'counts':[]};
     //they all have same length and index, like table: every row have same number of column
     for(var index=0; index<data.dates.length-1; index++){
       //console.log(enddate);
       //get item order history
       //var itemlogs = log.find({ 'itemid': item.id, date: {$between: [data.dates[index],data.dates[index+1]] } });
-      var date1 = data.dates[index].toJSON(),
-          date2 = data.dates[index+1].toJSON();
-      //console.log(date1,date2);
-      var itemlogs = log.find({ 'itemid': item.$loki, date: { $between: [date1,date2] } });
-      //console.log(itemlogs);
+      var date1 = data.dates[index].getTime(),
+          date2 = data.dates[index+1].getTime();
+      //var itemlogs = log.find({ 'itemid': item.$loki, date: { $between: [date1,date2] } });
+      var itemlogs = await query('SELECT * FROM log WHERE itemid = ? AND date > ? AND date < ?',
+        [item.id, date1, date2], {'price': Number});
+       
       itemlogdata.counts[index]=itemlogs.length;
       itemlogdata.prices[index]=0;
       itemlogs.forEach((itemlog)=>{
@@ -228,139 +221,256 @@ module.exports.getstatistics = (startdate,enddate,periodmin)=>{
       });
     }
     data.items.push(itemlogdata);
-  });
+  }
 
-  //console.log(data);
+    //console.log(log.find().length);
+    //console.log(tempcount);
   return data;
 }
 
-/*
-module.exports.getPrinter = (itemid)=>{
-  var printername = items.findOne({'$loki':itemid}).printer;
-  return printers.findOne({'name':printername});
+
+module.exports.getPrinter = async (printername)=>{
+  var res = await query('SELECT * FROM printers WHERE name = ?', [printername]);
+  res = res[0];
+  return res;
+  //return printers.findOne({'name':printername});
 };
-*/
-module.exports.getPrinter = (printername)=>{
-  return printers.findOne({'name':printername});
+
+
+module.exports.getqueuenumber = async ()=>{
+  var queuenumber = await query('SELECT value FROM savedata WHERE selector = "queuenumber"');
+  queuenumber = queuenumber[0].value;
+  queuenumber = JSON.parse(queuenumber);
+
+  if(queuenumber.date!=new Date().getDate()){
+    queuenumber.number = 0;
+  }
+  else{ queuenumber.number++; }
+  //savedata.update(queuenumber);
+  await query('UPDATE savedata SET value = ? WHERE selector = "queuenumber"', [JSON.stringify({'number': queuenumber.number, 'date': new Date().getDate()})]);
+ 
+  return queuenumber.number;
 };
+
+
 
 /* write into database */
 
-module.exports.log = (data)=>{
+module.exports.log = async (data)=>{
   //type, date
-  data.items.forEach((item)=>{
-    for(c=0; c<item.count; c++){
-      log.insert({'itemid': item.id, 'price': parseFloat(item.price.toFixed(2)) ,'date': new Date});
+  await query('BEGIN TRANSACTION');
+  for(c=0; c<data.items.length; c++){
+    var item = data.items[c];
+    for(d=0; d<item.count; d++){
+      await query('INSERT INTO log VALUES(?,?,?)',
+        [
+          item.id,  //itemid
+          parseFloat(item.price), //price
+          new Date().getTime() //date
+        ]);
     }
-  });
+  }
+
+  await query('END TRANSACTION');
 }
 
-module.exports.add = (data)=>{
+module.exports.add = async (data)=>{
   var resdata;
   switch(data.target){
     case 'items':
       //default position
       
-      data.item.position = items.find({ 'category': data.item.category }).length;
-      resdata = rewrap(data.target, items.insert(data.item));
+      data.item.position = query_count(await query('SELECT count(*) FROM items WHERE category = ?', [data.item.category], ['count']))
+      await query('INSERT INTO items VALUES (?,?,?,?,?,?,?,?)',
+        [
+          null, //id which is autoincrement
+          data.item.name,
+          data.item.category,
+          data.item.price,
+          data.item.printer,
+          data.item.background,
+          data.item.font,
+          data.item.position
+        ]);
+
+      resdata = await query('SELECT * FROM items WHERE category = ? AND position = ?', [data.item.category, data.item.position]);
+
       //console.log(categories.findOne({'name': data.item.category}));
-      if(!categories.findOne({'name': data.item.category})){
-        categories.insert({'name': data.item.category});
+      var category_exist = await query('SELECT * FROM categories WHERE name = ?', [data.item.category]);
+      if(category_exist[0] == undefined){
+        await query('INSERT INTO categories VALUES (?,?)',
+          [
+            null,
+            data.item.category
+          ]);
       }
       break;
     case 'printers':
-      resdata = rewrap(data.target, printers.insert(data.data));
+      //resdata = rewrap(data.target, printers.insert(data.data));
+      await query('INSERT INTO printers VALUES(?,?,?,?)',
+        [
+          null,
+          data.data.name,
+          data.data.ip,
+          data.data.port
+        ]);
+      resdata = await query('select * from printers WHERE name = ?', [data.data.name]);
       break;
     case 'tablenumber':
-      resdata = rewrap(data.target, tablenumber.insert(data.data));
+      //resdata = rewrap(data.target, tablenumber.insert(data.data));
+      await query('INSERT INTO tablenumber VALUES(?,?)',
+        [
+          null,
+          data.data.number
+        ]);
+      resdata = await query('select * from tablenumber WHERE number = ?', [data.data.number]);
       break;
     case 'extra':
-      resdata = rewrap(data.target, extra.insert(data.data));
+      //resdata = rewrap(data.target, extra.insert(data.data));
+      //
+      data.data.position = query_count(await query('SELECT count(*) FROM extra', ['count'])); 
+      await query('INSERT INTO extra VALUES (?,?,?,?)',
+        [
+          null,
+          data.data.text,
+          data.data.price,
+          data.data.position 
+        ]);
+
+      resdata = await query('SELECT * FROM extra WHERE position = ?', [data.data.position]);
       break;
     case 'remarks':
-      resdata = rewrap(data.target, remarks.insert(data.data));
+      //resdata = rewrap(data.target, remarks.insert(data.data));
+      data.data.position = query_count(await query('SELECT count(*) FROM remarks', ['count'])); 
+      await query('INSERT INTO remarks VALUES (?,?,?)',
+        [
+          null,
+          data.data.text,
+          data.data.position
+        ]);
+
+      resdata = await query('SELECT * FROM remarks WHERE position = ?', [data.data.position]);
       break;
     default:
       throw new Error("invalid target");
   }
   needtoRefresh = true;
+  resdata = resdata[0];
   return resdata;
 };
 
-module.exports.remove = (data)=>{
+
+module.exports.remove = async (data)=>{
   switch(data.target){
     case 'items':
-      var resdata = items.chain().find({ '$loki': data.id });
+      //var resdata = items.chain().find({ '$loki': data.id })[0];
+      //var resdata = await query('SELECT * FROM items WHERE id = ? items.chain().find({ '$loki': data.id });
       //if there is only one record with this category and was prepared to remove, then remove that category too
-      var item = items.findOne({ '$loki': data.id });
-      var list = items.find({ 'category': item.category }); 
-      if(list.length == 1){ //number another items which is same category
-        categories.chain().find({'name': item.category}).remove();
+      //var item = items.findOne({ '$loki': data.id });
+      var item = await query('SELECT category,position FROM items WHERE id = ?', [data.id],
+        { category: String, position: Number });
+      item = item[0];
+      await query('DELETE FROM items WHERE id = ?', [data.id]);
+      //var item = await query('SELECT category,position FROM items WHERE id = ?', [data.id]);
+      
+      var listcount = query_count(await query('SELECT count(*) FROM items WHERE category = ?', [item.category], ['count'])); 
+      if(listcount == 0){ //number of items which is in same category
+        //categories.chain().find({'name': item.category}).remove();
+        await query('DELETE FROM categories WHERE name = ?', [item.category]);
       }else{
+
         //shift the items position to replace the removed item
         //change to last position then remove
-        shift(items, item, list, list.length);
+        await query('UPDATE items SET position = position - 1 WHERE category = ? and position > ?', [item.category, item.position]);
+        //shift(items, item, list, list.length);
       }
       break;
     case 'printers':
-      var resdata = printers.chain().find({ '$loki': data.id });
+      await query('DELETE FROM printers WHERE id = ?',[data.id]);
+      //var resdata = printers.chain().find({ '$loki': data.id });
       break;
     case 'tablenumber':
-      var resdata = tablenumber.chain().find({ '$loki': data.id });
+      await query('DELETE FROM tablenumber WHERE id = ?',[data.id]);
+      //var resdata = tablenumber.chain().find({ '$loki': data.id });
       break;
     case 'extra':
-      var resdata = extra.chain().find({ '$loki': data.id });
-      var item = extra.findOne({ '$loki': data.id });
-      var list = extra.find(); 
-      shift(extra, item, list, list.length);
+      var position = await query('SELECT position FROM extra WHERE id = ?', [data.id]);
+      position = position[0].position;
+      await query('DELETE FROM extra WHERE id = ?', [data.id]);
+      await query('UPDATE extra SET position = position -1 WHERE position > ?', [data.id, position]);
       break;
     case 'remarks':
-      var resdata = remarks.chain().find({ '$loki': data.id });
-      var item = remarks.findOne({ '$loki': data.id });
-      var list = remarks.find(); 
-      shift(remarks, item, list, list.length);
+      var position = await query('SELECT position FROM remarks WHERE id = ?', [data.id]);
+      position = position[0].position;
+      await query('DELETE FROM remarks WHERE id = ?', [data.id]);
+      await query('UPDATE remarks SET position = position -1 WHERE position > ?', [data.id, position]);
       break;
     default:
       throw new Error("invalid target");
   }
   //console.log(resdata.remove());
-  resdata.remove();
   needtoRefresh = true;
   return 1;
 };
 
-module.exports.update = (data)=>{
+module.exports.update = async (data)=>{
   switch(data.target){
     case 'items':
-      var item = items.findOne({ '$loki': data.item.id });
-      item.name = data.item.name;
-      item.category = data.item.category;
-      item.printer = data.item.printer;
-      item.price = data.item.price;
-      item.background = data.item.background;
-      item.font = data.item.font;
-      items.update(item);
+      await query('UPDATE items SET name=?, category=?, printer= ?, price=?, background=?, font=? WHERE id= ? ',
+        [
+        data.item.name,
+          // -- warning -- change category, but position won't change, there's a but here
+        data.item.category,
+        data.item.printer,
+        data.item.price,
+        data.item.background,
+        data.item.font,
+
+        data.item.id
+      ]);
       break;
     case 'item_position':
-      var item = items.findOne({ '$loki': data.id });
-      var list = items.find({ 'category': item.category }); //item which is same category
+      //var position_target = data.position;
+      //var position_bfr = await query('SELECT position FROM items WHERE id = ?', [data.id]);
+      //data.position_bfr = position_bfr[0].position;
+      var category = await query('SELECT category FROM items WHERE id = ?', [data.id]);
+      category = category[0].category;
+
+      // to determine whether the position of replacing item is + or - 
+      if(data.position_bfr < data.position){
+        await query('UPDATE items SET position = position-1 WHERE category = ? AND position <= ? AND position > ?', [category, data.position, data.position_bfr]);
+      }
+      else if(data.position_bfr > data.position){
+        await query('UPDATE items SET position = position+1 WHERE category = ? AND position >= ? AND position < ?', [category, data.position, data.position_bfr]);
+        //await query('UPDATE items SET position = position+1 WHERE category = ? AND position = ?', [category, data.position]);
+      }
+
+      await query('UPDATE items SET position = ? WHERE id = ?', [data.position, data.id]);
       //reset_po(items, item, list, data.position);
       // just found out that sort position is not good in ux,
       // must use the way swap later, but now do other stuffs first .-.
       //**DAMN mantaince
-      shift(items, item, list, data.position);
       break;
     case 'remark_position':
-      var item = remarks.findOne({ '$loki': data.id });
-      var list = remarks.find();
-      //reset_po(remarks, item, list, data.position);
-      shift(remarks, item, list, data.position);
+      //var position_target = data.position;
+      //var position_bfr = await query('SELECT position FROM remarks WHERE id = ?', [data.id]);
+      //position_bfr = position_bfr[0].position;
+      if(data.position_bfr < data.position){
+        await query('UPDATE remarks SET position = position -1 WHERE position <= ? AND position > ?', [data.position, data.position_bfr]);
+      }else if(data.position_bfr > data.position){
+        await query('UPDATE remarks SET position = position +1 WHERE position >= ? AND position < ?', [data.position, data.position_bfr]);
+      }
+      await query('UPDATE remarks SET position = ? WHERE id = ?', [data.position, data.id]);
       break;
     case 'extra_position':
-      var item = extra.findOne({ '$loki': data.id });
-      var list = extra.find();
-      //reset_po(extra, item, list, data.position);
-      shift(extra, item, list, data.position);
+      if(data.position_bfr < data.position){
+        await query('UPDATE extra SET position = position -1 WHERE position <= ? AND position > ?', [data.position, data.position_bfr]);
+      }else if(data.position_bfr > data.position){
+        await query('UPDATE extra SET position = position +1 WHERE position >= ? AND position < ?', [data.position, data.position_bfr]);
+      }
+      await query('UPDATE extra SET position = ? WHERE id = ?', [data.position, data.id]);
+      break;
+
       break;
     default:
       throw new Error("invalid target");
@@ -369,43 +479,25 @@ module.exports.update = (data)=>{
   return 1;
 };
 
-//shifting all position
-var shift = (collection,item,list,position)=>{
-  var position_bfr = item.position;
-  for(var c=0; c<list.length; c++){
-    //console.log(list[c]+':'+list[c].position);
-    if(position >= list[c].position &&
-                        list[c].position > position_bfr){
-      list[c].position --;
-      //console.log(list[c]);
-      //console.log('--'+list[c].position);
-    }
-    if(position <= list[c].position &&
-                        list[c].position < position_bfr){
-      list[c].position ++;
-      //console.log(list[c]);
-      //console.log('++'+list[c].position);
-    }
-  }
-  //update every shifted
-  for(var c=0; c<list.length; c++){
-    collection.update(list[c]);
-  }
-  //update its own position
-  item.position = position;
-  collection.update(item);
 
-};
+
+
+
 
 
 /*
-var reset_po = (collection,item,list,position)=>{
-  for(var c=0; c<list.length; c++){
-    list[c].position = c;
-  }
-  for(var c=0; c<list.length; c++){
-    collection.update(list[c]);
-  }
-
+module.exports.attendance = function*(json){
+    yield query('BEGIN TRANSACTION');//woohuuuu
+        for(var c=0;c<json.attendance.length;c++){
+            yield query('INSERT OR REPLACE INTO attendance VALUES ( :date_clubid_studentno, :date, :clubid, :studentno, :status, :remarks )',{
+                'date_clubid_studentno':''+json[c].date+json[c].clubid+json[c].studentno,
+                'date':json[c].date,
+                'clubid':json[c].clubid,
+                'studentno':json.attendance[c].studentno,
+                'status':json.attendance[c].status,
+                'remarks':json.attendance[c].remarks
+            });
+        }
+    yield query('COMMIT');
 }
 */

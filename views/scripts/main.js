@@ -11,6 +11,7 @@ var data = {
     },
     resetorder = JSON.parse(JSON.stringify(order));//make a clone for reset after order
 
+var sendOrderButton = $('#sendOrderButton');
 var canvas=  document.getElementById('receipt');
 var receipt = new Receipt(canvas);
 var toReceipt = new ToReceipt(receipt);
@@ -40,6 +41,9 @@ function init(){
   cat.datalink = data;
   cat.showcat(data.categories[0]);
   
+
+  sendOrderButton.prop('disabled', false);
+  sendOrderButton.prop('value','Send');
 
   //init layout view
   $('.layout').hide();
@@ -75,6 +79,9 @@ function init(){
   } 
 
 function sendorder(){
+
+  sendOrderButton.prop('disabled', true);
+  sendOrderButton.prop('value','Sending...');
   
   //recover order if error
   var backuporder = JSON.parse(JSON.stringify(order));
@@ -94,13 +101,23 @@ function sendorder(){
     
   });
 
-  order.images = toReceipt.getImages(order);
+  var code;
+  $.ajax({
+    url: 'getnumber', 
+    type: 'POST',
+    async: false,
+    success: function(thisdata) {
+      code = thisdata;
+    }
+    //data is the JSON string
+  });
+
+  order.images = toReceipt.getImages(order, code);
 
   var orderclone = JSON.parse(JSON.stringify(order));
-  init();
 
   //send order
-  $.ajax({
+    $.ajax({
       url: 'order',
       type: 'POST',
       data: JSON.stringify(orderclone),
@@ -108,12 +125,15 @@ function sendorder(){
       //async: false,
       success: function(data) {
         //toggleto('#home','#tablenum');
-        //init();
+        init();
       },
       error: function (data) {
         order = backuporder;
         //temp=data;
         alert(data.responseText);
+
+        sendOrderButton.prop('disabled', false);
+        sendOrderButton.prop('value','Send');
     }
   });
 }

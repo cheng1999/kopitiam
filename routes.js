@@ -9,7 +9,12 @@ const ctxtype={
   html:{"Content-Type": "text/html"},
   json:{'Content-Type': 'application/json'}
 };
+var queuenumber = {
+  day: new Date().getDate(),
+  number: 0
+};
 
+dbop();
 
 module.exports = async (req,res)=>{
   try {
@@ -32,7 +37,7 @@ var routing = async (req,res)=>{
       break;
   
     case '/init':
-      var initvar = dbop.getInitJson(); 
+      var initvar = await dbop.getInitJson(); 
       res.writeHead(200, ctxtype.json);  
       res.write(JSON.stringify(initvar));
       res.end();
@@ -43,10 +48,9 @@ var routing = async (req,res)=>{
       data = JSON.parse(data);
       //console.log(data);
       try{
-        dbop.log(data);
         await printer.print(data.images);
         //print first then log
-        //dbop.log(data);
+        dbop.log(data);
       }catch(err){
         res.writeHead(500,ctxtype.html);
         console.error(err);
@@ -56,21 +60,32 @@ var routing = async (req,res)=>{
       res.end();
       break;
 
+    case '/getnumber':
+      var queuenumber = await dbop.getqueuenumber();
+      var code = ''+ queuenumber;
+      while(code.length<5){code = "0"+code}
+      res.writeHead(200, ctxtype.html);  
+      res.end("#"+code);
+      break;
+
+    case '/getlastDB_backup_date':
+      break;
+
     case '/config':
       var data = await request.getdata(req);
       data = JSON.parse(data);
       var resdata;
       if(data.add){
-        resdata = dbop.add(data.add);
+        resdata = await dbop.add(data.add);
         //if(data.add.target == 'printers')printer.reloadPrinters();
       }
       if(data.remove){
-        resdata = dbop.remove(data.remove);
+        resdata = await dbop.remove(data.remove);
         //if(data.remove.target == 'printers')printer.reloadPrinters();
       }
       //console.log(data);
       if(data.update){
-        resdata = dbop.update(data.update);
+        resdata = await dbop.update(data.update);
       }
       res.writeHead(200, ctxtype.json);  
       res.end(JSON.stringify(resdata));
@@ -82,13 +97,14 @@ var routing = async (req,res)=>{
     case '/getstatistics':
       var data = await request.getdata(req);
       data = JSON.parse(data);
-      var resdata = dbop.getstatistics(data.startdate,data.enddate,data.period);
+      var resdata = await dbop.getstatistics(data.startdate,data.enddate,data.period);
       res.writeHead(200, ctxtype.json);  
       res.end(JSON.stringify(resdata));
       break;
 
     case '/update':
       //require('child_process').spawn('sh', ['bash/update.sh'], {stdio: 'inherit'});
+      await dbop.saveDatabase();
       await bash.update();
       //spawn('sh', ['bash/delaylaunch.sh'], {stdio: 'inherit'});
       res.writeHead(200, ctxtype.html);  
@@ -98,14 +114,19 @@ var routing = async (req,res)=>{
       break;
 
     case '/restart':
+      //console.log('Saving database...');
+      //await dbop.saveDatabase();
       res.writeHead(200, ctxtype.html);  
-      res.end('updated');
+      console.log('restarting...');
       bash.delaylaunch();
+      res.end('restarted');
       process.exit();
       break;
 
     case '/backupdb.zip':
       await bash.backupdb();
+      dbop.updatelastDB_backup_date();
+      
       var path = appROOT+'/views/backupdb.zip';
       var file = await filestream.readfile(path);
       //res.writeHead(200);
@@ -116,7 +137,7 @@ var routing = async (req,res)=>{
     case '/restore':
       //var file = await request.getdata(req);
       await uploadfile.forrestore(req, appROOT+'/views/', 'backupdb.zip');
-      await bash.restoredb();
+      //await bash.restoredb();
       res.writeHead(200, ctxtype.html);  
       res.end('done');
       bash.delaylaunch();

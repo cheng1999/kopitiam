@@ -114,13 +114,13 @@
     </table>
     </div>
   </div>
-  <div onclick="sendorder()" class="ui green fluid huge rightbottom button" style="width:37%">Send</div>
+  <input onclick="sendorder()" id="sendOrderButton" class="ui green fluid huge rightbottom button" style="width:37%" value="Send">
 
 
   <div id="menu" class="ten wide column" style="width:62%!important;padding-top:0!important">
     <div class="ui grid">
       <div class="doubling four column row category nopadding nomargin">
-        <div v-on:click="showcat(category)" v-for="category in datalink.categories" class="ui fluid button column nopadding nomargin">
+        <div v-on:click="showcat(category)" v-for="category in datalink.categories" class="ui fluid button column nomargin">
           {{ category.name }}
         </div>
       </div>

@@ -2,7 +2,7 @@ function ToReceipt(receipt){
   this.receipt = receipt;
 }
 
-ToReceipt.prototype.getImages = function(data){
+ToReceipt.prototype.getImages = function(data, code){
   var receipt = this.receipt;
 
   var images = [];
@@ -18,8 +18,15 @@ ToReceipt.prototype.getImages = function(data){
 
   //pnow stand for 'printer now', or printer current
   for(var pnow=0; pnow<printers.length; pnow++){
-    receipt.addText("Table: ");//+ data.tablenumber);
+    receipt.addText("Table: ", { fontsize: receipt.fontsize.h4 });//+ data.tablenumber);
     receipt.addText(data.tablenumber, { fontsize: receipt.fontsize.h2 });
+    
+    var date = new Date();
+    receipt.addText(
+      (date.getMonth()+1) + '/'+date.getDate() + '|' + date.getHours() + ':' + date.getMinutes() + ' | ' + code,
+      { fontsize: receipt.fontsize.h4, align:'right' }
+    );
+
     receipt.println();
     receipt.newline();
 

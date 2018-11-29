@@ -16,7 +16,9 @@ module.exports.forrestore = (req, path, filename)=>{
     // every time a file has been uploaded successfully,
     // rename it to it's orignal name
     form.on('file', function(field, file) {
-      fs.rename(file.path, path+filename);
+      fs.rename(file.path, path+filename, function(err, stats){
+        throw new Error(err);
+      });
     });
 
     // log any errors that occur

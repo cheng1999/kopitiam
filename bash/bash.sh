@@ -3,7 +3,7 @@ case "$1" in
 
   "delaylaunch")
     sleep 1
-    node index.js
+    node index.js 2&>>err.log
     ;;
 
   "update")

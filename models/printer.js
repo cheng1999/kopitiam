@@ -34,7 +34,7 @@ var printout = () => {
 module.exports.print = async (images)=>{
     for(var c=0; c<images.length; c++){
           
-      var printer_data = dbop.getPrinter(images[c].printer);
+      var printer_data = await dbop.getPrinter(images[c].printer);
 
       // connect to printer and init
       printer.init({

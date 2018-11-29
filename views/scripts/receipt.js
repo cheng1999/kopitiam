@@ -8,7 +8,8 @@ class Receipt{
       fontsize: {
         h1: { size: 60, lh: 45 }, //lh is shor form of lineheight
         h2: { size: 60, lh: 45 },
-        h3: { size: 32, lh: 30 } //h3 is default fontsize
+        h3: { size: 32, lh: 30 }, //h3 is default fontsize
+        h4: { size: 26, lh: 24 } //h3 is default fontsize
       },
       width: 575 
     } 
