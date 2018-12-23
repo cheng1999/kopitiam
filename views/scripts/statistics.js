@@ -205,6 +205,13 @@ var vueData = new Vue({
     options:[],
     dates:[],
     items:[],
+  },
+  methods: {
+    showtime: function(date){
+      var period = $('.form_period').dropdown('get value');
+      //show in date or in time form
+      return (period < 1440 ? new Date(date).toLocaleTimeString() : new Date(date).toLocaleDateString());
+    }
   }
 });
 var vueFormOptions = new Vue({

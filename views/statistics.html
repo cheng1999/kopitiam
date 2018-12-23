@@ -53,7 +53,7 @@
     <thead>
       <tr>
         <th>Name</th>
-        <th v-for="date in dates">{{ new Date(date).toLocaleTimeString() }}</th>
+        <th v-for="date in dates">{{ showtime(date) }}</th>
         <th>Total</th>
       </tr>
     </thead>

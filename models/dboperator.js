@@ -416,11 +416,12 @@ module.exports.remove = async (data)=>{
 module.exports.update = async (data)=>{
   switch(data.target){
     case 'items':
-      await query('UPDATE items SET name=?, category=?, printer= ?, price=?, background=?, font=? WHERE id= ? ',
+      //cannot update category
+      //await query('UPDATE items SET name=?, category=?, printer= ?, price=?, background=?, font=? WHERE id= ? ',
+      await query('UPDATE items SET name=?, printer= ?, price=?, background=?, font=? WHERE id= ? ',
         [
         data.item.name,
-          // -- warning -- change category, but position won't change, there's a but here
-        data.item.category,
+        //data.item.category,
         data.item.printer,
         data.item.price,
         data.item.background,

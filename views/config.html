@@ -27,7 +27,8 @@
           <input v-model="form.item.name" placeholder="name" type="text">
         </div>
         <div class="two fields">
-          <div class="field">
+        <!-- <div v-bind:class="[form.type == 'modify' ? 'disabled': '']" class="field"> --!>
+          <div v-bind:class="{'disabled':(form.type == 'modify')}" class="field">
             <label>Category:</label>
             <select v-model="form.item.category" class="ui fluid search dropdown category two column">
               <option v-for="category in datalink.categories" v-bind:value="category.name">{{ category.name }}</option>
