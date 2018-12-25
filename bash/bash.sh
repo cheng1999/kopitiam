@@ -8,8 +8,13 @@ case "$1" in
 
   "update")
     echo "updating...."
-    wget http://192.168.0.111/update.zip -O update.zip > /dev/null
-    unzip -o update.zip >/dev/null
+#    wget http://192.168.0.111/update.zip -O update.zip > /dev/null
+    curl -s https://api.github.com/repos/cheng1999/releasetest/releases/latest \
+    | grep 'browser_download_url' \
+    | grep 'kopitiam.zip' \
+    | cut -d '"' -f 4 \
+    | wget -i -
+    unzip -o kopitiam.zip >/dev/null
     sh bash/update.sh
     echo "done"
     ;;
