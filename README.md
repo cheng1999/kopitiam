@@ -67,5 +67,5 @@ They always scolded me when the system comes bugs. :.(
 
 
 ## License
-no idea.
+All Rights Reserved
 
