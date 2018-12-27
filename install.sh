@@ -4,7 +4,7 @@
 echo '### Installing required package...'
 
 yes | pkg update
-pkg -y install nodejs sqlite libsqlite unzip zip vim curl
+yes | pkg install nodejs sqlite libsqlite unzip zip vim curl
 #termux install unzip and unzip
 #pkg install unzip zip
 
@@ -25,8 +25,11 @@ echo '### System configuring...'
 # cp $target/bash.bashrc $target/bash.bashrc.bak
 # echo 'cd kopitiam; node index.js' >> $target/bash.bashrc
 cd ~/../usr/etc
-cp bash.bashrc bash.bashrc.bak
-echo 'cd kopitiam; node index.js' >> bash.bashrc
+
+if [ ! -f bash.bashrc.bak ]; then
+  cp bash.bashrc bash.bashrc.bak
+  echo 'termux-wake-lock; cd kopitiam; node index.js' >> bash.bashrc
+fi
 
 echo '### Installed!'
 
