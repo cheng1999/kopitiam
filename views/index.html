@@ -8,7 +8,6 @@
   <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
   <link rel="stylesheet" type="text/css" href="scripts/main.css">
   <!-- copy from https://www.favicon-generator.org/ !-->
-  <!--
     <link rel="apple-touch-icon" sizes="57x57" href="favicon/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="favicon/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="favicon/apple-icon-72x72.png">
@@ -26,14 +25,9 @@
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="favicon/ms-icon-144x144.png">
     <meta name="theme-color" content="#ffffff">
-    --!>
   <title>Kopitiam</title>
 </head>
 
-<body style="overflow:hidden">
-<button class="ui mini button" onclick="back()">Back</button>
-<button class="ui mini button right floated" onclick="location.reload()">Check</button>
-<button class="ui mini button right floated" onclick="location.reload()">Refresh</button>
 <div id="tablenum" class="ui segment layout overflowhandler" style="padding-bottom:900px!important">
   <div class="ui grid container">
     <div v-for="table in tablenumber" class="four wide column">
@@ -42,67 +36,87 @@
   </div>
 </div>
 
-<div id="extraorder" class="ui segment layout">
-  <div class="ui header">
-    {{ itemlink.name }} RM {{ (itemlink.price + addprice).toFixed(2) }}
-  </div>
-  <div class="ui equal width column grid">
-    <div class="ui fluid action big input row">
-        <input v-model="remarktext" placeholder="remarks..." type="text">
-        <div v-on:click="addremark(remarktext)" class="ui button">add remarks</div>
-    </div> 
-    <div class="row">
-      <h3 class="ui header column">Extra:</h3>
-      <h3 class="ui header column">Remarks:</h3>
+<div id="extraorder" class="ui segment layout nopadding nomargin">
+  <div class="ui menu nomargin">
+    <button class="ui button item" onclick="back()">
+      <i class="left chevron icon"></i>
+    </button>
+    <div class="ui small header item">
+      {{ itemlink.name }} <br>
+      RM {{ (itemlink.price + addprice).toFixed(2) }}
     </div>
   </div>
-  <div class="ui equal width column grid">
-    <div class="column overflowhandler">
-      <div class="column ui big relaxed divided list">
-        <div v-for="(extra, index) in datalink.extra" class="ui checkbox item">
-          <input v-model="extraindex" v-bind:value="index" v-bind:id="'extra-'+index" type="checkbox">
-          <label v-bind:for="'extra-'+index" class="ui big label fluid">{{ extra.text }}
-            <a>+RM {{ extra.price.toFixed(2) }}</a>
-          </label>
+  <div class="ui segment" style="margin-top: 0; padding-top: 0">
+    <div class="ui equal width column grid">
+      <div class="ui fluid action big input row">
+          <input v-model="remarktext" placeholder="remarks..." type="text">
+          <div v-on:click="addremark(remarktext)" class="ui button">add remarks</div>
+      </div> 
+      <div class="row">
+        <h3 class="ui header column">Extra:</h3>
+        <h3 class="ui header column">Remarks:</h3>
+      </div>
+    </div>
+    <div class="ui equal width column grid">
+      <div class="column overflowhandler">
+        <div class="column ui big relaxed divided list">
+          <div v-for="(extra, index) in datalink.extra" class="ui checkbox item">
+            <input v-model="extraindex" v-bind:value="index" v-bind:id="'extra-'+index" type="checkbox">
+            <label v-bind:for="'extra-'+index" class="ui big label fluid">{{ extra.text }}
+              <a>+RM {{ extra.price.toFixed(2) }}</a>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="column overflowhandler">
+        <div class="column ui big relaxed divided list">
+          <div v-for="(remark, index) in datalink.remarks" class="ui big checkbox item">
+            <input v-model="remarks" v-bind:value="remark.text" v-bind:id="'remark-'+index" type="checkbox">
+            <label v-bind:for="'remark-'+index" class="ui big label fluid">{{ remark.text }}</label>
+          </div>
         </div>
       </div>
     </div>
-    <div class="column overflowhandler">
-      <div class="column ui big relaxed divided list">
-        <div v-for="(remark, index) in datalink.remarks" class="ui big checkbox item">
-          <input v-model="remarks" v-bind:value="remark.text" v-bind:id="'remark-'+index" type="checkbox">
-          <label v-bind:for="'remark-'+index" class="ui big label fluid">{{ remark.text }}</label>
-        </div>
-      </div>
-    </div>
+    <button v-on:click="order()" class="ui massive green fluid button rightbottom">Add</button>
   </div>
-  <button v-on:click="order()" class="ui massive green fluid button rightbottom">Add</button>
 </div>
 <div id="orders_queue" class="ui segment layout nopadding nomargin">
 </div>
 <div id="home" class="ui segment layout nopadding nomargin">
 <div class="ui grid">
-  <div id="checkorder" class="six wide column nopadding">
-    <div class="ui huge label fluid">Ordered:
-      <a class="ui green">RM {{ Number(orderlink.totalprice).toFixed(2) }}</a>
+  <div id="checkorder" class="six wide column nopadding_e_left">
+    <div class="ui menu nomargin">
+      <button class="ui button item" onclick="back()">
+        <i class="left chevron icon"></i>
+      </button>
+      <div class="ui small header item">
+        TBL: {{ orderlink.tablenumber }}<br>
+        Total: RM {{ Number(orderlink.totalprice).toFixed(2) }}
+      </div>
     </div>
-    <table class="ui fixed structured table nomargin">
+    <table class="ui fixed structured unstackable table nomargin">
       <thead>
         <tr>
           <th colspan="1"></th>
+          <th colspan="3">TBL: {{ orderlink.tablenumber }}</th>
+          <th colspan="3">Total: RM {{ Number(orderlink.totalprice).toFixed(2) }}</th>
+          <th colspan="1"></th>
+        </tr>
+        <tr>
+          <th colspan="1"></th>
           <th colspan="3">Name</th>
-          <th colspan="3">Price(RM)</th>
+          <th colspan="3">Price (RM)</th>
           <th colspan="1"></th>
         </tr>
       </thead>
     </table>
     <div class="overflowhandler">
-    <table class="ui fixed structured table">
+    <table class="ui fixed structured unstackable table">
       <tbody>
         <tr v-for="(order, index) in orderlink.items">
           <td v-on:click="cancel(order)" colspan="1" class="ui center aligned fluid button"><i class="small minus icon nomargin"></i></td>
           <td colspan="3" class="order_additions">
-            {{ order.count }} X {{ order.name }}
+            <b>{{ order.count }} X</b>  {{ order.name }}
             <a v-if="order.remarks!==[] || order.extra!==[]">
               {{ order.remarks.join() }} {{ order.remarks.join()!==''?',':'' }} {{ order.extra.map(function(extra){return extra.text}).join() }}
             </a>
@@ -125,7 +139,7 @@
         </div>
       </div>
       <div class="doubling four column row overflowhandler" style="padding-bottom:900px!important">
-      <div v-for="item in items"class="ui column nomargin nopadding">
+      <div v-for="item in items"class="ui column nomargin nopadding" style="padding:0; padding-top:0!important">
         <a v-on:click="order(item)" class="ui fluid big button" v-bind:style="'background-color:' + item.background + ';color:' + item.font" style="min-height:5em">
           {{ item.name }} <br> RM {{ Number(item.price).toFixed(2) }}
         </a>

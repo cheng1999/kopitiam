@@ -1,4 +1,7 @@
-
+body{
+  //max-height:100vh;
+  overflow: hidden;
+}
 .ui.modal {
   height:100%;
   width:100%!important;
@@ -11,9 +14,12 @@
 }
 
 td {
-  font-size:1.5em;
+  font-size: 1.2em;
 }
 
+th {
+  padding: 0!important;
+}
 /*---https://github.com/kylefox/jquery-tablesort---*/
 th.sorted.ascending:after {
 	content: "  \2191";
@@ -34,7 +40,7 @@ th.sorted.descending:after {
 
 .overflowhandler {
   height: 80vh;
-  //padding-bottom: 100px!important;
+  padding-bottom: 600px!important;
   overflow-y: scroll;
 }
 .overflowhandler-x {
@@ -53,6 +59,12 @@ th.sorted.descending:after {
 
 .nopadding {
   padding-left:0!important;
+  padding-right:0!important;
+  padding-top:0!important;
+  padding-bottom:0!important;
+}
+
+.nopadding_e_left {
   padding-right:0!important;
   padding-top:0!important;
   padding-bottom:0!important;
