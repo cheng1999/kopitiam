@@ -17,7 +17,7 @@ module.exports.forrestore = (req, path, filename)=>{
     // rename it to it's orignal name
     form.on('file', function(field, file) {
       fs.rename(file.path, path+filename, function(err, stats){
-        throw new Error(err);
+        if(err) throw new Error(err);
       });
     });
 

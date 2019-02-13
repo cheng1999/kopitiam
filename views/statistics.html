@@ -14,41 +14,47 @@
 
 <body class="ui segment">
 
-<div>
-  <div class="ui input calendar form_startdate">
-    <input type="text" placeholder="Date/Time">
+<div class="ui form">
+  <div class="inline fields">
+    <label>Time:</label>
+    <div class="ui input calendar four wide field form_startdate">
+      <input type="text" placeholder="Date/Time">
+    </div>
+    <label>to</label>
+    <div class="ui input calendar four wide field form_enddate">
+      <input type="text" placeholder="Date/Time">
+    </div>
+    <label>Period:</label>
+    <select class="ui dropdown form_period">
+      <!-- value is in unit minute !-->
+      <option value="30">30 Minutes</option>
+      <option value="60">1 Hour</option>
+      <option value="120">2 Hour</option>
+      <option value="180" selected="selected">3 Hour</option>
+      <option value="360">6 Hour</option>
+      <option value="720">12 Hour</option>
+      <option value="1440">Day</option>
+      <option value="10080">Weeks</option>
+      <option value="43800">Month</option>
+    </select>
   </div>
-  <label>to</label>
-  <div  class="ui input calendar form_enddate">
-    <input type="text" placeholder="Date/Time">
+  <div class="inline fields">
+    <label>Target:</label>
+    <select id="form_target_options" class="ui dropdown form_target">
+      <option class="item" data-value="Summary">Summary</option>
+      <option v-for="option in options" v-bind:data-value="option.name" class="item">{{ option }}</option>
+    </select>  
+    <label>Show in:</label>
+    <select class="ui dropdown form_showin">
+      <option class="item" data-value="Price">Price</option>
+      <option class="item" data-value="Count">Count</option>
+    </select>  
   </div>
-  <label>Period:</label>
-  <select class="ui dropdown form_period">
-    <!-- value is in unit minute !-->
-    <option value="30">30 Minutes</option>
-    <option value="60">1 Hour</option>
-    <option value="120">2 Hour</option>
-    <option value="180" selected="selected">3 Hour</option>
-    <option value="360">6 Hour</option>
-    <option value="720">12 Hour</option>
-    <option value="1440">Day</option>
-    <option value="10080">Weeks</option>
-    <option value="43800">Month</option>
-  </select>
-  <label>Target:</label>
-  <select id="form_target_options" class="ui dropdown form_target">
-    <option class="item" data-value="Summary">Summary</option>
-    <option v-for="option in options" v-bind:data-value="option.name" class="item">{{ option }}</option>
-  </select>  
-  <label>Show in:</label>
-  <select class="ui dropdown form_showin">
-    <option class="item" data-value="Price">Price</option>
-    <option class="item" data-value="Count">Count</option>
-  </select>  
-
   <div onclick="loaddata()" class="ui button">Load</div>
 </div>
-<div class="ui segment overflowhandler-x">
+
+</div>
+<div class="ui segment overflowhandler-x nopadding">
   <table id="data" class="ui celled table  ">
     <thead>
       <tr>

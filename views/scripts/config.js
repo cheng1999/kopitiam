@@ -108,6 +108,7 @@ function init(){
       }
     });
     sortitem_switcher(false);
+    vueItemMenu.showcat(window.data.categories[0].name);
   });
 }
 

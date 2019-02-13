@@ -59,7 +59,7 @@
       </div>
     </div>
     <div class="ui equal width column grid">
-      <div class="column overflowhandler">
+      <div class="column overflowhandler" style="height:calc( 100vh - 17em )">
         <div class="column ui big relaxed divided list">
           <div v-for="(extra, index) in datalink.extra" class="ui checkbox item">
             <input v-model="extraindex" v-bind:value="index" v-bind:id="'extra-'+index" type="checkbox">
@@ -69,7 +69,7 @@
           </div>
         </div>
       </div>
-      <div class="column overflowhandler">
+      <div class="column overflowhandler" style="height:calc( 100vh - 17em )">
         <div class="column ui big relaxed divided list">
           <div v-for="(remark, index) in datalink.remarks" class="ui big checkbox item">
             <input v-model="remarks" v-bind:value="remark.text" v-bind:id="'remark-'+index" type="checkbox">
@@ -144,10 +144,11 @@
           {{ category.name }}
         </div>
       </div>
-      <div class="doubling four column row nopadding overflowhandler" style="padding-bottom:5em!important">
+      <div class="four column row nopadding overflowhandler" style="padding-bottom:5em!important">
       <div v-for="item in items"class="ui column nomargin nopadding" style="padding-top:0!important;">
         <a v-on:click="order(item)" class="ui fluid big button" v-bind:style="'background-color:' + item.background + ';color:' + item.font" style="height:5em">
-          {{ item.name }} <br> RM {{ Number(item.price).toFixed(2) }}
+          {{ item.name }}
+          <h5>RM {{ Number(item.price).toFixed(2) }}</h5>
         </a>
         <a v-on:click="extra(item)" class="ui fluid label center aligned grid bottom attached" >
           <i class="small plus icon detail"></i>

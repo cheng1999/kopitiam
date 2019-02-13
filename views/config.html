@@ -4,249 +4,252 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
   <link rel="stylesheet" type="text/css" href="scripts/main.css">
   <title>Kopitiam</title>
 </head>
 
-<body>
-  <div id="menu" class="ui segment container cover layout">
-  <div class="ui huge menu">
-    <a data-tab="items" class="item">Items</a>
-    <a data-tab="arrange" class="item">Arrange</a>
-    <a data-tab="printer" class="item">Printers</a>
-    <a data-tab="table" class="item">Tables</a>
-    <a data-tab="extra" class="item">Extra</a>
-  </div>
+<body style="overflow: hidden">
+  <div id="menu" class="ui grid" style="margin-top:-1rem!important">
 
-  <div id="items" data-tab="items" class="ui tab segment six column grid">
-    <div v-for="form in formtypes" id="item_form" class="ui form segment" v-bind:class="form.class">
-        <div class="field">
-          <label>Name:</label>
-          <input v-model="form.item.name" placeholder="name" type="text">
-        </div>
-        <div class="two fields">
-        <!-- <div v-bind:class="[form.type == 'modify' ? 'disabled': '']" class="field"> --!>
-          <div v-bind:class="{'disabled':(form.type == 'modify')}" class="field">
-            <label>Category:</label>
-            <select v-model="form.item.category" class="ui fluid search dropdown category two column">
-              <option v-for="category in datalink.categories" v-bind:value="category.name">{{ category.name }}</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Printer:</label>
-            <select v-model="form.item.printer" class="ui fluid search dropdown printer six column">
-              <option v-for="printer in datalink.printers" v-bind:value="printer.name">{{ printer.name }}<option>
-            </select>
-          </div>
-        </div>
-        <div class="two fields">
-          <div class="field">
-            <label>Price:</label>
-            <div class="ui right labeled input">
-              <label class="ui label">RM</label>
-              <input v-model="form.item.price" placeholder="price" type="number" step="0.01">
-            </div>
-          </div>
-          <div class="field two fields">
-            <div class="field">
-            <label>Background color:</label>
-            <input v-model="form.item.background" type="color">
-            </div>
-            <div class="field">
-            <label>Font color:</label>
-            <input v-model="form.item.font" type="color">
-            </div>
-          </div>
-        </div>
-      <button v-if="form.type=='add'" v-on:click="add()" class="ui fluid button">Add</button>
-      <button v-if="form.type=='modify'" v-on:click="modify()" class="ui fluid button">Modify</button>
-    </div>
-    <table class="ui celled table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Category</th>
-          <th>Printer</th>
-          <th>Price</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in datalink.items">
-          <td>
-            <a class="ui basic label" style="padding:0;margin:0" >
-              <i class="square icon basic label" style="padding:0;margin:0" v-bind:style="'color:' + (typeof(item.color)=='undefined' ? '#ffffff': item.color)" ></i>
-            </a> 
-            {{ item.name }}
-          </td>
-          <td>{{ item.category }}</td>
-          <td>{{ item.printer }}</td>
-          <td>RM {{ Number(item.price).toFixed(2) }}
-            <div v-on:click="remove(item)" class="ui red button right floated">delete</div>
-            <div v-on:click="modify_modal(item)" class="ui green button right floated">modify</div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div id="arrange" data-tab="arrange" class="ui tab segment">
-  <!-- from below is a copy from a part in index.html, the main page of the program, but have some different --!>
-  <!-- different: width=60% !-->
-  <div class="eight wide column" style="width:100%!important;padding-top:0!important">
-    <div class="ui grid">
-      <div class="doubling four column row category nopadding nomargin">
-        <div v-for="category in datalink.categories" class="ui fluid button column nopadding nomargin">
-          <div v-on:click="showcat(category)" class="ui fluid big button">
-            {{ category.name }}
-          </div>
-        </div>
-      </div>
-      <!-- 
-        id=draggable_items
-        style add:
-        padding-right:200px , reserve additional space for mobile to scroll because draggable items make items' area unscrollable. 
-      --!>
-      <div id="draggable_items" class="doubling four column row overflowhandler" style="padding-bottom:900px!important;padding-right:200px!important">
-      
-      <div v-for="item in items" class="ui column nomargin nopadding">
-        <!--
-          v-on:mouseDown=clicked(item)
-          class add:"drag_handle"
-        --!>
-        <a v-on:mouseDown="clicked(item)" class="ui fluid big button drag_handle" v-bind:style="'background-color:' + item.background + ';color:' + item.font" style="min-height:5em">
-          {{ item.name }} <br> RM {{ Number(item.price).toFixed(2) }}
+    <div class="four wide column">
+      <div class="ui vertical fluid tabular menu">
+        <a onclick="vueForm.add_modal()" class="ui fluid big green button">
+          <i class="plus circle icon"></i>
+          Add Item 
         </a>
-        <!-- v-on:click=vueItems.modify_modal(item); class add:"drag_handle" --!>
-        <a v-on:click="vueItems.modify_modal(item)" class="ui fluid label center aligned grid bottom attached" >
-          <i class="small plus icon detail"></i>
-        </a>
-       </div>
-      </div>
-    </div>
-  </div>
-  <!-- end --!>
-  </div>
-
-  <div id="printers" data-tab="printer" class="ui tab segment six column grid">
-    <div class="ui form segment">
-      <div class="three fields">
-        <div class="field">
-          <div class="ui right labeled input">
-            <label class="ui label">Printer Name</label>
-            <input v-model="form.name" placeholder="name" type="text">
+        <a data-tab="itemmenu" class="item">Item Menu</a>
+        <a data-tab="printer" class="item">Printers</a>
+        <a data-tab="table" class="item">Tables</a>
+        <a data-tab="extra" class="item">Extra</a>
+        <div class="right menu item">
+          <div class="ui toggle checkbox">
+            <input type="checkbox" onclick="sortitem_switcher(this.checked)">
+            <label>Arrange</label>
           </div>
         </div>
-        <div class="field">
-          <div class="ui right labeled input">
-            <label class="ui label">ip</label>
-            <input v-model="form.ip" value="192.168.192.168" type="text">
+      </div>
+    </div>
+    <div class="twelve wide stretched column">
+      <div id="item_form" class="ui fullscreen modal transition visible" style="display: block !important;" >
+        <i class="close icon"></i>
+        <div class="header">
+        <!-- Update Your Settings --!>
+          {{ type=='modify'?'Modify':'Add' }}
+        </div>
+        <div class="content">
+          <div class="ui form">
+            <div class="field">
+              <label>Name:</label>
+              <input v-model="item.name" placeholder="name" type="text">
+            </div>
+            <div class="two fields">
+            <!-- <div v-bind:class="[form.type == 'modify' ? 'disabled': '']" class="field"> --!>
+              <div v-bind:class="{'disabled':(type == 'modify')}" class="field">
+                <label>Category:</label>
+                <input class="categoryin" type="hidden">
+                <select v-model="item.category" class="ui fluid search dropdown category two column">
+                  <option v-for="category in datalink.categories" v-bind:value="category.name">{{ category.name }}</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Printer:</label>
+                <select v-model="item.printer" class="ui fluid search dropdown printer six column">
+                  <option v-for="printer in datalink.printers" v-bind:value="printer.name">{{ printer.name }}<option>
+                </select>
+              </div>
+            </div>
+            <div class="two fields">
+              <div class="field">
+                <label>Price:</label>
+                <div class="ui right labeled input">
+                  <label class="ui label">RM</label>
+                  <input class="price" v-model="item.price" placeholder="price" type="number" step="0.01">
+                </div>
+              </div>
+              <div class="field two fields">
+                <div class="field">
+                <label>Background color:</label>
+                <input class="bg-color" v-model="item.background" type="color">
+                </div>
+                <div class="field">
+                <label>Font color:</label>
+                <input class="f-color" v-model="item.font" type="color">
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="field">
-          <div class="ui right labeled input">
-            <label class="ui label">port</label>
-            <input v-model="form.port" value="9100" type="number">
+        <div class="actions">
+          <div v-if="type=='modify'" v-on:click="remove(item.id)" class="ui red deny button">Delete</div>
+          <div v-if="type=='add'" v-on:click="add()" class="ui green fluid button">Add</div>
+          <div v-if="type=='modify'" v-on:click="modify()" class="ui green button">Modify</div>
+        </div>
+      </div>
+
+        <div id="itemmenu" data-tab="itemmenu" class="ui tab">
+        <!-- from below is a copy from a part in index.html, the main page of the program, but have some different --!>
+        <!-- different: width=60% !-->
+        <div class="eight wide column" style="width:100%!important;padding-top:0!important">
+          <div class="ui grid">
+
+            <div id="draggable_categories" class="category nopadding nomargin" style="overflow-x:scroll; display:inherit; width:100%; height:5em">
+              <a v-on:click="showcat(category.name)" v-on:mouseDown="window.mousedown_itemid = category.id" v-for="category in datalink.categories" class="ui big button nomargin drag_handle" style="min-width:25%; display:inlinx-block">
+                {{ category.name }}
+              </a>
+            </div>
+            <div id="draggable_items" class="four column row nopadding overflowhandler" style="padding-bottom:5em!important">
+            <div v-for="item in items"class="ui column nomargin nopadding" style="padding-top:0!important;">
+              <a v-on:click.self="vueForm.modify_modal(item)" v-on:mouseDown="window.mousedown_itemid = item.id" class="ui fluid big button drag_handle" v-bind:style="'background-color:' + item.background + ';color:' + item.font" style="height:5em">
+                {{ item.name }} 
+                <h5>RM {{ Number(item.price).toFixed(2) }}</h5>
+
+                <div v-if="sortitem_checked" v-on:click="vueForm.remove(item.id)" class="button_float ui red label">
+                  <i class="delete icon"></i>
+                </div>
+              </a>
+              <a v-on:click="vueForm.modify_modal(item)" class="ui fluid label center aligned grid bottom attached" >
+                <i class="small plus icon detail"></i>
+              </a>
+             </div>
+            </div>
+
           </div>
         </div>
- 
-      </div>
-      <button v-on:click="add()" class="ui fluid button">Add</button>
-    </div>
-    <table class="ui celled table">
-      <thead>
-        <tr>
-          <th>Printer Name</th>
-          <th>Printer URL</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="printer in datalink.printers">
-          <td>{{ printer.name }}</td>
-          <td>
-            {{ printer.ip }}:{{ printer.port }}
-            <div v-on:click="remove(printer)" class="ui red button right floated">delete</div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <div id="tablenum" data-tab="table" class="ui tab segment six column grid">
-    <div class="ui action input">
-      <input v-model="form.number" placeholder="table number" type="text">
-      <button v-on:click="add()" class="ui button">Add</button>
-    </div>
-    <div class="ui segment three blue buttons grid">
-      <div v-for="table in datalink.tablenumber" class="ui large label">
-        {{ table.number }}
-        <i v-on:click="remove(table)" class="delete icon"></i>
-      </div>
-    </div>
-  </div>
+        <!-- end --!>
+        </div>
 
-  <div id="extra" data-tab="extra" class="ui tab segment six column grid">
-    <div class="ui eight wide column grid left aligned">
-      <div class="row">
-        <h3 class="ui header">Extra:</h3>
-      </div> 
-
-      <div class="ui fluid action input row">
-          <input v-model="extraform.text" placeholder="extra..." type="text">
-          <div class="ui right labeled input">
-            <label class="ui label">RM</label>
-            <input v-model="extraform.price" placeholder="" type="number">
+        <div id="printers" data-tab="printer" class="ui tab segment six column grid overflowhandler">
+          <div class="ui form segment">
+            <div class="three fields">
+              <div class="field">
+                <div class="ui right labeled input">
+                  <label class="ui label">Printer Name</label>
+                  <input v-model="form.name" placeholder="name" type="text">
+                </div>
+              </div>
+              <div class="field">
+                <div class="ui right labeled input">
+                  <label class="ui label">ip</label>
+                  <input v-model="form.ip" value="192.168.192.168" type="text">
+                </div>
+              </div>
+              <div class="field">
+                <div class="ui right labeled input">
+                  <label class="ui label">port</label>
+                  <input v-model="form.port" value="9100" type="number">
+                </div>
+              </div>
+       
+            </div>
+            <button v-on:click="add()" class="ui fluid button">Add</button>
           </div>
-      </div> 
-      <div v-on:click="add('extra')" class="ui fluid button">Add</div>
-      <table class="ui celled table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Text</th>
-            <th>Price</th>
-          </tr>
-        </thead>
-        <tbody id="draggable_extra">
-          <tr v-for="extra in datalink.extra" v-on:mouseDown="clicked(extra)">
-            <td class="drag_handle"><i class="resize vertical icon"></i></td>
-            <td>{{ extra.text }}</td>
-            <td>
-              RM {{ extra.price }}
-              <div v-on:click="remove('extra',extra.id)" class="ui red button right floated">delete</div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+          <table class="ui celled table">
+            <thead>
+              <tr>
+                <th>Printer Name</th>
+                <th>Printer URL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="printer in datalink.printers">
+                <td>{{ printer.name }}</td>
+                <td>
+                  {{ printer.ip }}:{{ printer.port }}
+                  <div v-on:click="remove(printer)" class="ui red button right floated">delete</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="tablenum" data-tab="table" class="ui tab segment six column grid">
+          <div class="ui action input">
+          <input v-model="form.number" placeholder="table number" type="text">
+            <button v-on:click="add()" class="ui button">Add</button>
+          </div>
+          <div id="draggable_table" class="ui grid container overflowhandler" style="padding-bottom:5em!important">
+            <div v-for="table in datalink.tablenumber" class="four wide column">
+              <a v-on:mouseDown="window.mousedown_itemid = table.id" class="ui right labeled icon fluid huge button">{{table.number}}
+
+                <div v-if="sortitem_checked" class="button_float ui red label nopadding" style="height:1.5em; width:1.5em">
+                  <i v-on:click="remove(table)" class="delete icon"></i>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div id="extra" data-tab="extra" class="ui tab segment six column grid">
+          <div class="ui eight wide column grid floated left">
+
+            <h3 class="ui header nopadding">Extra:</h3>
+            <div class="ui action input nopadding">
+              <input v-model="extraform.text" placeholder="extra..." type="text">
+
+              <div class="ui right labeled input">
+                <label class="ui label">RM</label>
+                <input v-model="extraform.price" placeholder="" type="number">
+              </div>
+            </div>
+
+            <div v-on:click="add('extra')" class="ui fluid button">Add</div>
+            <table class="ui fixed structured unstackable table nomargin">
+                <thead>
+                  <tr>
+                    <th colspan="1"></th>
+                    <th colspan="2">Text</th>
+                    <th colspan="2">Price</th>
+                    <th colspan="1"></th>
+                  </tr>
+                </thead>
+            </table>
+            <div class="overflowhandler nopadding" style="height:75vh">
+              <table class="ui fixed structured unstackable table">
+                <tbody id=draggable_extra>
+                  <tr v-for="extra in datalink.extra" v-on:mouseDown="window.mousedown_itemid = extra.id">
+                    <td colspan="1" class="drag_handle"><i class="caret right icon"></i></td>
+                    <td colspan="2">{{ extra.text }}</td>
+                    <td colspan="2">RM {{ Number(extra.price).toFixed(2) }}</td>
+                    <td colspan="1" v-on:click="remove('remarks', remark.id)"><i class="x icon"></i></td>
+                    <!--<td v-on:click="cancel(order)" colspan="1" class="ui center aligned fluid button"><i class="small minus icon nomargin"></i></td> --!>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div class="ui eight wide column grid floated right">
+            <h3 class="ui header nopadding">Remarks:</h3>
+            <div class="ui fluid action input nopadding">
+              <input v-model="remarksform.text" placeholder="remarks..." type="text">
+            </div>
+            <div v-on:click="add('remarks')" class="ui fluid button">Add</div>
+            <table class="ui fixed structured unstackable table nomargin">
+                <thead>
+                  <tr>
+                    <th colspan="1"></th>
+                    <th colspan="4">Text</th>
+                    <th colspan="1"></th>
+                  </tr>
+                </thead>
+            </table>
+            <div class="overflowhandler nopadding" style="height:75vh">
+              <table class="ui fixed structured unstackable table">
+                <tbody id=draggable_remarks>
+                  <tr v-for="remark in datalink.remarks" v-on:mouseDown="window.mousedown_itemid = remark.id">
+                    <td colspan="1" class="drag_handle"><i class="caret right icon"></i></td>
+                    <td colspan="4">{{ remark.text }}</td>
+                    <td colspan="1" v-on:click="remove('remarks', remark.id)"><i class="x icon"></i></td>
+                    <!--<td v-on:click="cancel(order)" colspan="1" class="ui center aligned fluid button"><i class="small minus icon nomargin"></i></td> --!>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div> 
+        </div>
+      </div>
     </div>
- 
-    
-    <div class="ui eight wide column grid floated right">
-      <div class="row">
-        <h3 class="ui header">Remarks:</h3>
-      </div>
-      <div class="ui fluid action input row">
-        <input v-model="remarksform.text" placeholder="remarks..." type="text">
-      </div>
-      <div v-on:click="add('remarks')" class="ui fluid button">Add</div>
-      <table class="ui celled table">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Text</th>
-            </tr>
-          </thead>
-          <tbody id="draggable_remarks">
-            <tr v-for="remark in datalink.remarks" v-on:mouseDown="clicked(remark)">
-              <td class="drag_handle"><i class="resize vertical icon"></i></td>
-              <td>
-                {{ remark.text }}
-                <div v-on:click="remove('remarks', remark.id)" class="ui red button right floated">delete</div>
-              </td>
-            </tr>
-          </tbody>
-      </table>
-    </div> 
   </div>
 </div>
 <script src="include/jquery-3.2.1.min.js"></script>

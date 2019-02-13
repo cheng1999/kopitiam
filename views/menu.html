@@ -10,31 +10,73 @@
   <title>Kopitiam</title>
 </head>
 
-<body class="ui segment container grid center aligned" style="height:100%">
-  <div class="row">
-    <button onclick="location.href='statistics.html'" class="ui fluid big button">Statistics</button>
+<body class="ui basic segment container" style="height:100%">
+  <h3 class="ui horizontal divider">Map</h3>
+    <a onclick="location.href='statistics.html'" class="ui icon label message">
+      <i class="table icon"></i>
+      <div class="content">
+        <div class="header">
+          Statistics
+        </div>
+        <p>Summarize how much orders has made.</p>
+      </div>
+    </a>
+    <a onclick="location.href='config.html'" class="ui icon label message">
+      <i class="cog icon"></i>
+      <div class="content">
+        <div class="header">
+          Configuration
+        </div>
+        <p>Configuration about menu items, table number, printers and etc.</p>
+      </div>
+    </a>
+    <a onclick="location.href='index.html'" class="ui icon label message">
+      <i class="edit icon"></i>
+      <div class="content">
+        <div class="header">
+          Food Ordering
+        </div>
+        <p>Client-side Food Ordering System.</p>
+      </div>
+    </a>
+  <h3 class="ui horizontal divider" style="margin-top:10vh">Advanced</h3>
+  <div class="ui grid container" style="padding-bottom:5em">
+      <a onclick="load('update')" class="ui fluid big button">Update Version</a>
+      <div class="eight wide column">
+        <a onclick="location.href='backupdb.zip'" class="ui fluid big button">Backup Database</a>
+      </div>
+      <form id="restoredb_form" class="eight wide column">
+          <label for="file" class="ui fluid big icon button">
+              <i class="file icon"></i>
+              Retore Database</label>
+          <input type="file" id="file" style="display:none" onchange="restoredb()" >
+      </form>
+      <a onclick="load('restart')" class="ui fluid big button">Restart System</a>
   </div>
-  <div class="row">
-    <button onclick="location.href='config.html'" class="ui fluid big button">Config</button>
-  </div>
-  <div class="row">
-    <button onclick="location.href='index.html'" class="ui fluid big button">Order</button>
-  </div>
-  <div class="row">
-    <button onclick="location.href='update'" class="ui fluid big button">Update</button>
-  </div>
-  <div class="stackable three column row">
-    <button onclick="location.href='backupdb.zip'" class="ui button column nomargin">Backup</button>
-    <form action="restore" method="post" enctype="multipart/form-data" class="ui form wide column nomargin">
-      <input type="file" name="filetoupload" style="height:50%">
-      <input type="submit" class="ui submit fluid large button" style="height:50%" value="Restore">
-    </form>
-    <button onclick="location.href='restart'" class="ui button column nomargin">Restart</button>
-  </div> 
-  <div class="row">
-  </div>
-
 </body>
 
-
+<script src="include/jquery-3.2.1.min.js"></script>
+<script>
+function restoredb(){
+  console.log($('#restoredb_form').serialize());
+  $.ajax({
+    url: 'restoredb',
+    type: 'POST',
+    data : $('#restoredb_form').serialize(),
+    success: function(data){
+      alert(data);
+    }
+  });
+}
+function load(target){
+  $.ajax({
+    url: target, 
+    type: 'POST',
+    async: false,
+    success: function(data) {
+      alert(data);
+    }
+  });
+}
+</script>
 </html>

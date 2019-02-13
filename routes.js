@@ -46,7 +46,6 @@ var routing = async (req,res)=>{
     case '/order':
       var data = await request.getdata(req);
       data = JSON.parse(data);
-      //console.log(data);
       try{
         await printer.print(data.images);
         //print first then log
@@ -78,13 +77,10 @@ var routing = async (req,res)=>{
       var resdata;
       if(data.add){
         resdata = await dbop.add(data.add);
-        //if(data.add.target == 'printers')printer.reloadPrinters();
       }
       if(data.remove){
         resdata = await dbop.remove(data.remove);
-        //if(data.remove.target == 'printers')printer.reloadPrinters();
       }
-      //console.log(data);
       if(data.update){
         resdata = await dbop.update(data.update);
       }
@@ -104,10 +100,7 @@ var routing = async (req,res)=>{
       break;
 
     case '/update':
-      //require('child_process').spawn('sh', ['bash/update.sh'], {stdio: 'inherit'});
-      await dbop.saveDatabase();
       await bash.update();
-      //spawn('sh', ['bash/delaylaunch.sh'], {stdio: 'inherit'});
       res.writeHead(200, ctxtype.html);  
       res.end('updated');
       bash.delaylaunch();
@@ -115,8 +108,6 @@ var routing = async (req,res)=>{
       break;
 
     case '/restart':
-      //console.log('Saving database...');
-      //await dbop.saveDatabase();
       res.writeHead(200, ctxtype.html);  
       console.log('restarting...');
       bash.delaylaunch();
@@ -126,7 +117,7 @@ var routing = async (req,res)=>{
 
     case '/backupdb.zip':
       await bash.backupdb();
-      dbop.updatelastDB_backup_date();
+      dbop.update_last_backup_date();
       
       var path = appROOT+'/views/backupdb.zip';
       var file = await filestream.readfile(path);
@@ -135,14 +126,14 @@ var routing = async (req,res)=>{
       res.end();
       break;
 
-    case '/restore':
-      //var file = await request.getdata(req);
+    case '/restoredb':
       await uploadfile.forrestore(req, appROOT+'/views/', 'backupdb.zip');
-      //await bash.restoredb();
+      await bash.restoredb();
       res.writeHead(200, ctxtype.html);  
       res.end('done');
-      bash.delaylaunch();
-      process.exit();
+      //bash.delaylaunch();
+      dbop.reconnect_database();
+      //process.exit();
       break;
 
     default:
@@ -155,41 +146,6 @@ var routing = async (req,res)=>{
         res.writeHead(404, ctxtype.html);
         res.end('404');
       }
-
   }
-/*
-        if(req.url == '/'){
-          res.writeHeader(200, ctxtype.html);  
-          var html = await filestream.readfile(appROOT + '/views/index.html');
-          res.write(html);
-          res.end();
-        }
-        //response code 200 first
-        res.writeHead(200, ctxtype.json);
-
-        if(req.url == '/attendance' && req.method == 'POST'){
-            var data = await request.getdata(req);//get the post from req data
-            //var json =  JSON.parse(post);
-            res.end(data);
-        }
-        else if(req.url.substring(0,13)==('/getnamelist/')){
-            var clubid = req.url.replace('/getnamelist/','');
-            clubid = parseInt(clubid);//by original it is string from url, but we convert it to integer
-            var namelist = await dboperator.getnamelist(clubid);
-            res.end(JSON.stringify(namelist));
-        }
-        else if(req.url==('/getclublist')){
-            var clublist = await dboperator.getclublist();
-            res.end(JSON.stringify(clublist));
-        }
-        else if(req.url==('/testserver')){//let clients validate server is work for them
-            var version={'version':'attendance.v1'};
-            res.end(JSON.stringify(version));
-        }
-        else{
-            var res_error={'error':"404"};
-            res.end(JSON.stringify(res_error));
-        }
-  */
 }
 
