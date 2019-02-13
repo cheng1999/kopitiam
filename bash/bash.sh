@@ -27,7 +27,8 @@ case "$1" in
 
   "backupdb")
     rm views/backupdb.zip
-    zip -r views/backupdb.zip db/* >/dev/null;
+    # zip -r views/backupdb.zip db/* >/dev/null;
+    zip -r views/backupdb.zip main.db log.db >/dev/null;
     echo "done"
     ;;
 

@@ -14,7 +14,7 @@ var queuenumber = {
   number: 0
 };
 
-dbop();
+dbop.init();
 
 module.exports = async (req,res)=>{
   try {
@@ -72,6 +72,7 @@ var routing = async (req,res)=>{
       break;
 
     case '/config':
+
       var data = await request.getdata(req);
       data = JSON.parse(data);
       var resdata;

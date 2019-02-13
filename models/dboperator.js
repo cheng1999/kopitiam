@@ -1,7 +1,7 @@
-const dbBuilt = require('fs').existsSync(appROOT+'/db.sqlite'),//variable for check exists of database
+const dbBuilt = require('fs').existsSync(appROOT+'/main.db'),//variable for check exists of database
   dblite = require('dblite');
   //dblite.bin = appROOT+'/sqlite/sqlite3.exe';
-var db = dblite(appROOT+'/db.sqlite', '-header');
+var db = dblite(appROOT+'/main.db', '-header');
 
 //db.on('close', function (code) {});// by default, it logs 'bye bye', but I want it to shut up
 
@@ -11,15 +11,26 @@ db.on('close', function (code) {
   // and every statement in the queue executed
   // the code is the exit code returned via SQLite3
   // usually 0 if everything was OK
-  console.log('safe to get out of here ^_^_');
+  console.log('reconnecting database_');
 });
 
-/* some functions */
-var query = (arg1,arg2,arg3)=>{//db.query() have maximun 4 arguments, last one for callback
-    return new Promise(function(resolve,reject){
 
-        var callback = function(err,rows){ //the args 4, or the last argements
-            if(err) reject(err);
+/* some functions */
+//issue: https://github.com/WebReflection/dblite/issues/23 
+//seems some error will cause database unresponsive, so we just reconnect it violently after error :(
+var reconnect_database = ()=>{
+  db.close();
+  db = dblite(appROOT+'/main.db', '-header');
+  this.init();
+}
+var query = (arg1,arg2,arg3)=>{//db.query() have maximun 4 arguments, last one for callback
+    return new Promise((resolve,reject)=>{
+
+        var callback = (err,rows)=>{ //the args 4, or the last argements
+            if(err) {
+              reconnect_database();
+              reject(err);
+            }
             else resolve(rows);
         }
         try{
@@ -27,7 +38,8 @@ var query = (arg1,arg2,arg3)=>{//db.query() have maximun 4 arguments, last one f
             else if(arg2) db.query(arg1,arg2,callback);
             else if(arg1) db.query(arg1,callback);
         }catch(err){
-            reject(err);
+          reconnect_database();
+          reject(err);
         }
     });
 }
@@ -38,9 +50,10 @@ var query_count = (query_result)=>{
 }
 
 //initial
-module.exports = ()=>{
+module.exports.init = ()=>{
   //turn the foreign keys on
   db.query('PRAGMA foreign_keys = ON;',function(){});//add function at the back to prevent it print out result on console
+  db.query('ATTACH DATABASE "' + appROOT + '/log.db" AS logdb', function(){});
 
   //build database if not yet
   if(!dbBuilt){
@@ -48,7 +61,8 @@ module.exports = ()=>{
     db.query('\
       CREATE TABLE categories (\
         id INTEGER PRIMARY KEY AUTOINCREMENT,\
-        name VARCHAR(255) UNIQUE NOT NULL\
+        name VARCHAR(255) UNIQUE NOT NULL,\
+        position INTEGER\
       )'
     );
 
@@ -90,7 +104,8 @@ module.exports = ()=>{
     db.query('\
       CREATE TABLE tablenumber (\
         id INTEGER PRIMARY KEY AUTOINCREMENT,\
-        number VARCHAR(255) NOT NULL\
+        number VARCHAR(255) NOT NULL,\
+        position INTEGER\
       )'
     );
 
@@ -106,7 +121,7 @@ module.exports = ()=>{
 
     //log
     db.query('\
-      CREATE TABLE log (\
+      CREATE TABLE logdb.log (\
         itemid INTEGER NOT NULL,\
         price DOUBLE NOT NULL,\
         date TEXT NOT NULL\
@@ -159,7 +174,7 @@ module.exports.getInitJson = async ()=>{
   items_list = await query('SELECT * FROM items ORDER BY position ASC', { 'price': Number });
   remarks_list = await query('SELECT * FROM remarks ORDER BY position ASC');
   extra_list = await query('SELECT * FROM extra ORDER BY position ASC', { 'price': Number });
-  tablenumber_list = await query('SELECT * FROM tablenumber ORDER BY number ASC'); 
+  tablenumber_list = await query('SELECT * FROM tablenumber ORDER BY position ASC'); 
   printers_list = await query('SELECT * FROM printers');
 
   initJson = {
@@ -210,7 +225,7 @@ module.exports.getstatistics = async (startdate,enddate,periodmin)=>{
       var date1 = data.dates[index].getTime(),
           date2 = data.dates[index+1].getTime();
       //var itemlogs = log.find({ 'itemid': item.$loki, date: { $between: [date1,date2] } });
-      var itemlogs = await query('SELECT * FROM log WHERE itemid = ? AND date > ? AND date < ?',
+      var itemlogs = await query('SELECT * FROM logdb.log WHERE itemid = ? AND date > ? AND date < ?',
         [item.id, date1, date2], {'price': Number});
        
       itemlogdata.counts[index]=itemlogs.length;
@@ -275,11 +290,11 @@ module.exports.log = async (data)=>{
 }
 
 module.exports.add = async (data)=>{
+  
   var resdata;
   switch(data.target){
     case 'items':
       //default position
-      
       data.item.position = query_count(await query('SELECT count(*) FROM items WHERE category = ?', [data.item.category], ['count']))
       await query('INSERT INTO items VALUES (?,?,?,?,?,?,?,?)',
         [
@@ -298,10 +313,13 @@ module.exports.add = async (data)=>{
       //console.log(categories.findOne({'name': data.item.category}));
       var category_exist = await query('SELECT * FROM categories WHERE name = ?', [data.item.category]);
       if(category_exist[0] == undefined){
-        await query('INSERT INTO categories VALUES (?,?)',
+
+        var position = query_count(await query('SELECT count(*) FROM categories', ['count']));
+        await query('INSERT INTO categories VALUES (?,?,?)',
           [
             null,
-            data.item.category
+            data.item.category,
+            position
           ]);
       }
       break;
@@ -318,10 +336,12 @@ module.exports.add = async (data)=>{
       break;
     case 'tablenumber':
       //resdata = rewrap(data.target, tablenumber.insert(data.data));
-      await query('INSERT INTO tablenumber VALUES(?,?)',
+      var position = query_count(await query('SELECT count(*) FROM tablenumber', ['count']));
+      await query('INSERT INTO tablenumber VALUES(?,?,?)',
         [
           null,
-          data.data.number
+          data.data.number,
+          position
         ]);
       resdata = await query('select * from tablenumber WHERE number = ?', [data.data.number]);
       break;
@@ -413,7 +433,34 @@ module.exports.remove = async (data)=>{
   return 1;
 };
 
+
+
+
 module.exports.update = async (data)=>{
+
+  /** POSITION SHIFTING **/
+  var shift_position = async(table, add_command, add_params)=>{
+    console.log(table,add_command,add_params);
+          // to determine whether the position of replacing item is + or - 
+    if(data.position_bfr < data.position){
+      //await query('UPDATE items SET position = position-1 WHERE category = ? AND position <= ? AND position > ?', [category, data.position, data.position_bfr]);
+      await query('UPDATE ? SET position = position-1 WHERE position <= ? AND position > ? '  + add_command, 
+        [table, data.position, data.position_bfr].concat(add_params));
+    }
+    else if(data.position_bfr > data.position){
+      //await query('UPDATE items SET position = position+1 WHERE category = ? AND position >= ? AND position < ?', [category, data.position, data.position_bfr]);
+      await query('UPDATE ? SET position = position+1 WHERE position >= ? AND position < ? ' + add_command, 
+        [table, data.position, data.position_bfr].concat(add_params));
+      //await query('UPDATE items SET position = position+1 WHERE category = ? AND position = ?', [category, data.position]);
+    }
+
+    await query('UPDATE ? SET position = ? WHERE id = ?', [table, data.position, data.id]);
+    //reset_po(items, item, list, data.position);
+    // just found out that sort position is not good in ux,
+    // must use the way swap later, but now do other stuffs first .-.
+    //**DAMN mantaince
+  }
+
   switch(data.target){
     case 'items':
       //cannot update category
@@ -430,48 +477,23 @@ module.exports.update = async (data)=>{
         data.item.id
       ]);
       break;
+  
+    case 'category_position':
+      await shift_position('categories','',[]);
+      break;
+    case 'tablenumber_position':
+      await shift_position('tablenumber','',[]);
+      break;
     case 'item_position':
-      //var position_target = data.position;
-      //var position_bfr = await query('SELECT position FROM items WHERE id = ?', [data.id]);
-      //data.position_bfr = position_bfr[0].position;
       var category = await query('SELECT category FROM items WHERE id = ?', [data.id]);
       category = category[0].category;
-
-      // to determine whether the position of replacing item is + or - 
-      if(data.position_bfr < data.position){
-        await query('UPDATE items SET position = position-1 WHERE category = ? AND position <= ? AND position > ?', [category, data.position, data.position_bfr]);
-      }
-      else if(data.position_bfr > data.position){
-        await query('UPDATE items SET position = position+1 WHERE category = ? AND position >= ? AND position < ?', [category, data.position, data.position_bfr]);
-        //await query('UPDATE items SET position = position+1 WHERE category = ? AND position = ?', [category, data.position]);
-      }
-
-      await query('UPDATE items SET position = ? WHERE id = ?', [data.position, data.id]);
-      //reset_po(items, item, list, data.position);
-      // just found out that sort position is not good in ux,
-      // must use the way swap later, but now do other stuffs first .-.
-      //**DAMN mantaince
+      await shift_position('items', 'AND category = ?', [category]);
       break;
     case 'remark_position':
-      //var position_target = data.position;
-      //var position_bfr = await query('SELECT position FROM remarks WHERE id = ?', [data.id]);
-      //position_bfr = position_bfr[0].position;
-      if(data.position_bfr < data.position){
-        await query('UPDATE remarks SET position = position -1 WHERE position <= ? AND position > ?', [data.position, data.position_bfr]);
-      }else if(data.position_bfr > data.position){
-        await query('UPDATE remarks SET position = position +1 WHERE position >= ? AND position < ?', [data.position, data.position_bfr]);
-      }
-      await query('UPDATE remarks SET position = ? WHERE id = ?', [data.position, data.id]);
+      await shift_position('remarks','',[]);
       break;
     case 'extra_position':
-      if(data.position_bfr < data.position){
-        await query('UPDATE extra SET position = position -1 WHERE position <= ? AND position > ?', [data.position, data.position_bfr]);
-      }else if(data.position_bfr > data.position){
-        await query('UPDATE extra SET position = position +1 WHERE position >= ? AND position < ?', [data.position, data.position_bfr]);
-      }
-      await query('UPDATE extra SET position = ? WHERE id = ?', [data.position, data.id]);
-      break;
-
+      await shift_position('extra','',[]);
       break;
     default:
       throw new Error("invalid target");

@@ -1,19 +1,38 @@
-var data = {};
-
+window.data={};
+//var data = window.data;
+/*
 $.getJSON('init', function(thisdata) {
   //data is the JSON string
   data = thisdata;
+  window.data = thisdata;
   init();
 });
 var temp;
+*/
+
+//initial
+refresh_data(init);
+
+
+function refresh_data(callback){
+  $.getJSON('init', function(thisdata) {
+    //data is the JSON string
+    window.data = thisdata;
+
+    vueForm.datalink = window.data;
+    vueItemMenu.datalink = window.data;
+    vuePrinters.datalink = window.data;
+    vueTablenum.datalink = window.data;
+    vueExtra.datalink = window.data;
+
+    //reset elements' position, because the data is updated
+    $('.sortable').sortable('cancel');
+
+    callback();
+  });
+}
+
 function init(){
-
-  vueItems.datalink = data;
-  vueArrange.datalink = data;
-  vuePrinters.datalink = data;
-  vueTablenum.datalink = data;
-  vueExtra.datalink = data;
-
     //take reference to https://vuejs.org/v2/api/#Vue-nextTick
   Vue.nextTick(function(){
     //semantic's function: combine menu and tab together,
@@ -34,30 +53,36 @@ function init(){
 
     //sort table
     $('table').tablesort();
-
+    
     //drag to sort item
     //https://stackoverflow.com/a/12962399/5617437
-    $("#draggable_items, #draggable_remarks, #draggable_extra").sortable({
-      handle: '.drag_handle',
+    $("#draggable_categories, #draggable_table, #draggable_items, #draggable_remarks, #draggable_extra").addClass("sortable");
+    $(".sortable").sortable({
+      //handle: '.drag_handle',
       start: function(event, ui) {
         ui.item.position_bfr = ui.item.index();
       },
       stop: function(event, ui) {
         var sortable_id = ui.item.parent().get(0).id;
-        var target, id;
+        var target;
 
         switch(sortable_id){
+          case 'draggable_categories':
+            target = 'category_position';
+            break;
+          case 'draggable_table':
+            target = 'tablenumber_position';
+            break;
           case 'draggable_items':
             target = 'item_position';
-            id = vueArrange.clicked_item.id; //the clicked item in vueItems is the item to change position
             break;
           case 'draggable_remarks':
             target = 'remark_position';
-            id = vueExtra.clicked_item.id;
             break;
           case 'draggable_extra':
             target = 'extra_position';
-            id = vueExtra.clicked_item.id;
+            break;
+          default:
             break;
         };
 
@@ -65,12 +90,13 @@ function init(){
           data:{
             'update':{
               'target': target,
-              'id': id, 
+              'id': window.mousedown_itemid, 
               'position_bfr': ui.item.position_bfr, //position before
               'position': ui.item.index(), //position after
             }
           },
           success: function(data){
+          refresh_data(function(){});
             //vueItems.shift_position(ui.item.position_bfrs, ui.item.position_after); 
           },
           error: function(data){
@@ -81,7 +107,22 @@ function init(){
         });
       }
     });
+    sortitem_switcher(false);
   });
+}
+
+var sortitem_checked = false;
+function sortitem_switcher(checked){
+  if(!checked){
+    sortitem_checked = false;
+    $('.sortable').sortable('disable');
+  }
+  else{
+    sortitem_checked = true;
+    $('.sortable').sortable('enable');
+  }
+  vueItemMenu.$forceUpdate();
+  vueTablenum.$forceUpdate();
 }
 
 function sendAjax(config){
@@ -104,12 +145,129 @@ function sendAjax(config){
   });
 }
 
+var vueForm = new Vue({
+  el: '#item_form',
+  data: {
+    'datalink': {}, //given value in init()
+    'type':'modify',
+    'item': {
+      'name':'',
+      'category':'',
+      'printer':'',
+      'price': 0,
+      'background':'#ffffff',
+      'font':'#555555',
+    },
+    //'class': '',
+     /*
+      'modify': {
+        'type':'modify',
+        'class': 'ui modal',
+        'item': {} //will be given value when modify modal poped
+      },
+    ],
+    */
+  },
+  methods: {
+
+    'add': function(){
+      var datalink = this.datalink;
+      var item = this.item;
+      //price is in float format
+      item.price = parseFloat(item.price);
+      sendAjax({
+        data:{
+          'add':{
+            'target':'items',
+            'item':item,
+          }
+        },
+        success: function(data){
+          //datalink.items.push(JSON.parse(data));
+          //window.data.items.push(JSON.parse(data));
+          refresh_data(function(){vueItemMenu.showcat(window.clicked_category)});
+          
+          $('#item_form.ui.modal').modal('hide');
+        },
+      });
+    },
+    'modify': function(){
+      var item = this.item;
+      item.price = parseFloat(item.price);
+      sendAjax({
+        data:{
+          'update':{
+            'target':'items',
+            'item':item,
+          }
+        },
+        success: function(data){
+          refresh_data(function(){});
+          $('#item_form.ui.modal').modal('hide');
+        },
+      });
+    },
+    'remove': function(itemid){
+      if(!confirm("Are you sure ?")){return ;}
+      var datalink = this.datalink;
+      sendAjax({
+        data:{
+          'remove':{
+            'target':'items',
+            //'id':this.item.id
+            'id':itemid
+          }
+        },
+        success: function(data){
+          //refresh_data(function(){});
+          refresh_data(function(){vueItemMenu.showcat(window.clicked_category)});
+          /*
+          for(var c=0; c<datalink.items.length; c++){
+            if(datalink.items[c].id === item.id){
+              datalink.items.splice(c,1);
+              //console.log(datalink.items.splice(c));
+              break;
+              //c--;
+            }
+          }
+          */
+        },
+      });
+    },
+   'modify_modal': function(item){
+      //this.formtypes[1].bakcupitem = JSON.parse(JSON.stringify(item));
+      this.type = 'modify'; 
+      this.item = item; 
+      //semantic ui dropdown doesn't show default value so use following codes
+      $('#item_form .category').dropdown('set selected', item.category);
+      $('#item_form .printer').dropdown('set selected', item.printer);
+      $('.ui.modal').modal('show');
+    },
+    'add_modal': function(){
+      this.type = 'add';
+      /*
+      this.item =  {
+      'name':'',
+      'category':'',
+      'printer':'',
+      'price': 0,
+      'background':'#ffffff',
+      'font':'#555555',
+      };
+      */
+
+      $('.ui.modal').modal('show');
+    }
+
+  }
+});
+
 var vueItems = new Vue({
   el: '#items',
   data: {
     'datalink': {}, //given value in init()
-    'formtypes':[
-      { 
+    'item': {},
+    'form': {
       'type':'add',
       'class': '',
       'item': {
@@ -119,20 +277,22 @@ var vueItems = new Vue({
         'price': 0,
         'background':'#ffffff',
         'font':'#555555',
-        },
-      },
-      {
+        }
+    },
+      /*
+      'modify': {
         'type':'modify',
         'class': 'ui modal',
         'item': {} //will be given value when modify modal poped
       },
     ],
+    */
   },
   methods: {
 
     'add': function(){
       var datalink = this.datalink;
-      var form = this.formtypes[0];
+      var form = this.form;
       //price is in float format
       form.item.price = parseFloat(form.item.price);
       sendAjax({
@@ -143,12 +303,14 @@ var vueItems = new Vue({
           }
         },
         success: function(data){
-          datalink.items.push(JSON.parse(data));
+          refresh_data(function(){vueItemMenu.showcat(window.clicked_category)});
+          //datalink.items.push(JSON.parse(data));
+          //data.items.push(JSON.parse(data));
         },
       });
     },
     'modify': function(){
-      var form = this.formtypes[1];
+      var form = this.form;
       form.price = parseFloat(form.item.price);
       sendAjax({
         data:{
@@ -158,6 +320,7 @@ var vueItems = new Vue({
           }
         },
         success: function(data){
+          refresh_data(function(){});
           $('#item_form.ui.modal').modal('hide');
         },
       });
@@ -172,6 +335,8 @@ var vueItems = new Vue({
           }
         },
         success: function(data){
+          refresh_data(function(){vueItemMenu.showcat(window.clicked_category)});
+          /*
           for(var c=0; c<datalink.items.length; c++){
             if(datalink.items[c].id === item.id){
               datalink.items.splice(c,1);
@@ -180,12 +345,14 @@ var vueItems = new Vue({
               //c--;
             }
           }
+          */
         },
       });
     },
    'modify_modal': function(item){
-      this.formtypes[1].bakcupitem = JSON.parse(JSON.stringify(item));
-      this.formtypes[1].item = item; 
+      //this.formtypes[1].bakcupitem = json.parse(json.stringify(item));
+      form.type = 'modify'; 
+      this.item = item; 
       //semantic ui dropdown doesn't show default value so use following codes
       $('#item_form.ui.modal .category').dropdown('set selected', item.category);
       $('#item_form.ui.modal .printer').dropdown('set selected', item.printer);
@@ -195,25 +362,22 @@ var vueItems = new Vue({
   }
 });
 
-var vueArrange = new Vue({
-  el: '#arrange',
+var vueItemMenu = new Vue({
+  el: '#itemmenu',
   data: {
     'datalink': {}, //given value in init();
-    'clicked_item': {}, //this will be link of an item
     'items': [], //value given in methods showcat()
   },
   methods: {
-    'showcat': function(category){
+    'showcat': function(category_name){
+      window.clicked_category = category_name;
       var cat_items = [];
-      this.datalink.items.forEach(function (item){
-        if(item.category === category.name){
+      window.data.items.forEach(function (item){
+        if(item.category === category_name){
           cat_items.push(item);
         }
       });
       this.items = cat_items;
-    },
-    'clicked': function(item){
-      this.clicked_item = item;
     },
     //the item which change position
     //shift the position
@@ -228,7 +392,7 @@ var vueArrange = new Vue({
           itemslink[c].position += plus_or_minus;
         }
       }
-      this.clicked_item.position = endPosition;
+      //this.clicked_item.position = endPosition;
       this.sort_position();
 
     },
@@ -275,7 +439,8 @@ var vuePrinters = new Vue({
           }
         },
         success: function(data){
-          datalink.printers.push(JSON.parse(data));
+          refresh_data(function(){});
+          //datalink.printers.push(JSON.parse(data));
         },
       });
     },
@@ -289,6 +454,8 @@ var vuePrinters = new Vue({
           }
         },
         success: function(data){
+          refresh_data(function(){});
+          /*
           for(var c=0; c<datalink.printers.length; c++){
             if(datalink.printers[c].id === printer.id){
               datalink.printers.splice(c,1);
@@ -297,6 +464,7 @@ var vuePrinters = new Vue({
               //c--;
             }
           }
+          */
         },
       });
     }
@@ -322,7 +490,11 @@ var vueTablenum = new Vue({
           }
         },
         success: function(data){
-          datalink.tablenumber.push(JSON.parse(data));
+          refresh_data(function(){
+            vueTablenum.form.number='';
+            //$("#tablenum .input input").val('');
+          });
+          //datalink.tablenumber.push(JSON.parse(data));
         },
       });
     },
@@ -336,6 +508,8 @@ var vueTablenum = new Vue({
           }
         },
         success: function(data){
+          refresh_data(function(){});
+          /*
           for(var c=0; c<datalink.tablenumber.length; c++){
             if(datalink.tablenumber[c].id === table.id){
               console.log(table.id);
@@ -343,6 +517,7 @@ var vueTablenum = new Vue({
               break;
             }
           }
+          */
         },
       });
     }
@@ -357,7 +532,6 @@ var vueExtra = new Vue({
       'price':0
     },
     'remarksform':{'text':''},
-    'clicked_item': {}, //this will be link of an item
   },
   methods: {
     'add': function(target){
@@ -372,6 +546,8 @@ var vueExtra = new Vue({
           }
         },
         success: function(data){
+          refresh_data(function(){});
+          /*
           var targetlink;
           switch(target){
             case 'extra':
@@ -382,6 +558,7 @@ var vueExtra = new Vue({
               break;
           }
           targetlink.push(JSON.parse(data));
+          */
         },
       });
     },
@@ -396,6 +573,8 @@ var vueExtra = new Vue({
           }
         },
         success: function(data){
+          refresh_data(function(){});
+          /*
           var targetlink;
           switch(target){
             case 'extra':
@@ -411,11 +590,9 @@ var vueExtra = new Vue({
               break;
             }
           }
+          */
         },
       });
-    },
-    'clicked': function(item){
-      this.clicked_item = item;
     },
   }
 });

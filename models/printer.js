@@ -6,7 +6,7 @@ const printer = require('node-thermal-printer'),
 var checkPrinter = ()=>{
   return new Promise((resolve,reject)=>{
     printer.isPrinterConnected((isConnected)=>{ 
-      if(!isConnected)reject("printer not connected.");
+      if(!isConnected)reject("Printer not connected.");
       resolve(isConnected);
     });
   });

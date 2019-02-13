@@ -27,19 +27,20 @@
     <meta name="theme-color" content="#ffffff">
   <title>Kopitiam</title>
 </head>
-
-<div id="tablenum" class="ui segment layout overflowhandler" style="padding-bottom:900px!important">
+<body style="overflow: hidden">
+<div id="tablenum" class="ui segment layout overflowhandler">
   <div class="ui grid container">
     <div v-for="table in tablenumber" class="four wide column">
-      <button v-on:click="selectnumber(table.number)" class="ui fluid huge button">{{table.number}}</button>
+      <a v-on:click="selectnumber(table.number)" class="ui fluid huge button">{{table.number}}</a>
     </div>
+
   </div>
 </div>
 
 <div id="extraorder" class="ui segment layout nopadding nomargin">
   <div class="ui menu nomargin">
     <button class="ui button item" onclick="back()">
-      <i class="left chevron icon"></i>
+      <i class="arrow left icon"></i>
     </button>
     <div class="ui small header item">
       {{ itemlink.name }} <br>
@@ -82,16 +83,21 @@
 </div>
 <div id="orders_queue" class="ui segment layout nopadding nomargin">
 </div>
-<div id="home" class="ui segment layout nopadding nomargin">
+<div id="home" class="ui layout nopadding nomargin">
 <div class="ui grid">
   <div id="checkorder" class="six wide column nopadding_e_left">
     <div class="ui menu nomargin">
       <button class="ui button item" onclick="back()">
-        <i class="left chevron icon"></i>
+        <i class="arrow left icon"></i>
       </button>
       <div class="ui small header item">
         TBL: {{ orderlink.tablenumber }}<br>
         Total: RM {{ Number(orderlink.totalprice).toFixed(2) }}
+      </div>
+      <div class="right menu">
+        <button class="ui button item" onclick="location.reload()">
+          <i class="redo icon"></i>
+        </button>
       </div>
     </div>
     <table class="ui fixed structured unstackable table nomargin">
@@ -110,7 +116,7 @@
         </tr>
       </thead>
     </table>
-    <div class="overflowhandler">
+    <div class="overflowhandler" style="padding-bottom:26vh">
     <table class="ui fixed structured unstackable table">
       <tbody>
         <tr v-for="(order, index) in orderlink.items">
@@ -133,14 +139,14 @@
 
   <div id="menu" class="ten wide column" style="width:62%!important;padding-top:0!important">
     <div class="ui grid">
-      <div class="doubling four column row category nopadding nomargin">
-        <div v-on:click="showcat(category)" v-for="category in datalink.categories" class="ui fluid big button column nomargin">
+      <div class="category nopadding nomargin" style="overflow-x:scroll; display:inherit; width:100%; height:5em">
+        <div v-on:click="showcat(category)" v-for="category in datalink.categories" class="ui big button nomargin" style="min-width:25%; display:inlinx-block">
           {{ category.name }}
         </div>
       </div>
-      <div class="doubling four column row overflowhandler" style="padding-bottom:900px!important">
-      <div v-for="item in items"class="ui column nomargin nopadding" style="padding:0; padding-top:0!important">
-        <a v-on:click="order(item)" class="ui fluid big button" v-bind:style="'background-color:' + item.background + ';color:' + item.font" style="min-height:5em">
+      <div class="doubling four column row nopadding overflowhandler" style="padding-bottom:5em!important">
+      <div v-for="item in items"class="ui column nomargin nopadding" style="padding-top:0!important;">
+        <a v-on:click="order(item)" class="ui fluid big button" v-bind:style="'background-color:' + item.background + ';color:' + item.font" style="height:5em">
           {{ item.name }} <br> RM {{ Number(item.price).toFixed(2) }}
         </a>
         <a v-on:click="extra(item)" class="ui fluid label center aligned grid bottom attached" >
