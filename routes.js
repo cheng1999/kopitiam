@@ -1,5 +1,5 @@
 const dbop = require('./models/dboperator.js'),
-      request = require('./models/request.js'),
+      requesthandler = require('./models/requesthandler.js'),
       filestream = require('./models/filestream.js'),
       printer = require('./models/printer'),
       bash = require('./models/bash.js'),
@@ -44,7 +44,7 @@ var routing = async (req,res)=>{
       break;
 
     case '/order':
-      var data = await request.getdata(req);
+      var data = await requesthandler.getdata(req);
       data = JSON.parse(data);
       try{
         await printer.print(data.images);
@@ -72,7 +72,7 @@ var routing = async (req,res)=>{
 
     case '/config':
 
-      var data = await request.getdata(req);
+      var data = await requesthandler.getdata(req);
       data = JSON.parse(data);
       var resdata;
       if(data.add){
@@ -88,11 +88,12 @@ var routing = async (req,res)=>{
       res.end(JSON.stringify(resdata));
       break;
 
-    case '/getconfig':
+    case '/getversion':
+      res.end(appVERSION);
       break;
-       
+
     case '/getstatistics':
-      var data = await request.getdata(req);
+      var data = await requesthandler.getdata(req);
       data = JSON.parse(data);
       var resdata = await dbop.getstatistics(data.startdate,data.enddate,data.period);
       res.writeHead(200, ctxtype.json);  
@@ -100,9 +101,14 @@ var routing = async (req,res)=>{
       break;
 
     case '/update':
+      //check for latest version
+      var data = JSON.parse(await requesthandler.getrequest('https://api.github.com/repos/cheng1999/kopitiam/releases/latest'));
+      var latestversion = data.tag_name;
+      if (appVERSION == latestversion){res.end('No updates found. You already have the latest version.');return ;}
+
       await bash.update();
       res.writeHead(200, ctxtype.html);  
-      res.end('updated');
+      res.end('Updated');
       bash.delaylaunch();
       process.exit();
       break;

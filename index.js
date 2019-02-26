@@ -1,4 +1,5 @@
 global.appROOT = __dirname;
+global.appVERSION = '0.7';
 
 const http = require('http');
     routes = require('./routes.js');

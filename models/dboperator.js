@@ -147,6 +147,9 @@ module.exports.init = ()=>{
         'lastbackup',
         JSON.stringify({'time': new Date().getTime()})
       ]);
+
+    db.query('CREATE INDEX logdb.date_index ON log (date ASC)');
+ //create unique index m.qwe on users (name);
   }
 }
 
@@ -184,7 +187,8 @@ module.exports.getInitJson = async ()=>{
     'extra': extra_list,
     //'tablenumber': config.tablenumber
     'tablenumber': tablenumber_list,
-    'printers': printers_list
+    'printers': printers_list,
+    'version': appVERSION 
   };
   return initJson;
 };
@@ -295,8 +299,8 @@ module.exports.add = async (data)=>{
           data.item.category,
           data.item.price,
           data.item.printer,
-          data.item.background,
           data.item.font,
+          data.item.background,
           data.item.position
         ]);
 
