@@ -6,7 +6,7 @@ const printer = require('node-thermal-printer'),
 var checkPrinter = ()=>{
   return new Promise((resolve,reject)=>{
     printer.isPrinterConnected((isConnected)=>{ 
-      if(!isConnected)reject("Printer not connected.");
+      //if(!isConnected)reject("Printer not connected.");
       resolve(isConnected);
     });
   });
@@ -45,7 +45,7 @@ module.exports.print = async (images)=>{
 
       //require('fs').writeFile('p'+c+'.png', Buffer.from(images[c].image, 'base64'), function(err){});
       if(! await checkPrinter()){
-        throw new Error("cannot connect to printer");
+        throw new Error("Printer not connected");
       }
 
       await printImageBuffer( Buffer.from(images[c].image, 'base64') );

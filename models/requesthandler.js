@@ -37,3 +37,16 @@ module.exports.getrequest = (url) => {
     });
   });
 };
+
+//reference to https://stackoverflow.com/a/3409200
+module.exports.getcookies = (request) => {
+  var list = {},
+    rc = request.headers.cookie;
+
+  rc && rc.split(';').forEach(function( cookie ) {
+    var parts = cookie.split('=');
+    list[parts.shift().trim()] = decodeURI(parts.join('='));
+  });
+
+  return list;
+}

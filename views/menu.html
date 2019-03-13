@@ -8,6 +8,14 @@
   <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
   <link rel="stylesheet" type="text/css" href="scripts/main.css">
   <title>Kopitiam</title>
+  <style>
+    .advmargin {
+      margin-top:1rem!important;
+    }
+    .advcolumn {
+      padding-bottom:0!important;
+    }
+  </style>
 </head>
 
 <body class="ui basic segment container" style="height:100%">
@@ -41,19 +49,21 @@
     </a>
   <h3 class="ui horizontal divider" style="margin-top:10vh">Advanced</h3>
   <div class="ui grid container" style="padding-bottom:5em">
-      <a onclick="load('update')" class="ui fluid big button">Update Version</a>
-      <div class="eight wide column">
+      <a onclick="load('update')" class="ui fluid big button advmargin">Update Version</a>
+      <div class="eight wide column advcolumn">
         <a onclick="location.href='backupdb.zip'" class="ui fluid big button">Backup Database</a>
       </div>
-      <form id="restoredb_form" class="eight wide column">
+      <form id="restoredb_form" class="eight wide column advcolumn">
           <label for="file" class="ui fluid big icon button">
               <i class="file icon"></i>
               Retore Database</label>
           <input type="file" id="file" style="display:none" onchange="restoredb()" >
       </form>
-      <a onclick="load('restart')" class="ui fluid big button">Restart System</a>
+      <a onclick="load('restart')" class="ui fluid big button advmargin">Restart System</a>
+      <a onclick="document.cookie = 'hash=; Max-Age=0'; location.reload()" class="ui fluid big button advmargin">Logout</a>
   </div>
 </body>
+
 
 <script src="include/jquery-3.2.1.min.js"></script>
 <script>

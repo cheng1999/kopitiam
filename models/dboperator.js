@@ -29,7 +29,7 @@ var query = (arg1,arg2,arg3)=>{//db.query() have maximun 4 arguments, last one f
         var callback = (err,rows)=>{ //the args 4, or the last argements
             if(err) {
               this.reconnect_database();
-              reject(err);
+              return err;
             }
             else resolve(rows);
         }
@@ -39,7 +39,7 @@ var query = (arg1,arg2,arg3)=>{//db.query() have maximun 4 arguments, last one f
             else if(arg1) db.query(arg1,callback);
         }catch(err){
           this.reconnect_database();
-          reject(err);
+          return err;
         }
     });
 }
@@ -124,7 +124,18 @@ module.exports.init = ()=>{
       CREATE TABLE logdb.log (\
         itemid INTEGER NOT NULL,\
         price DOUBLE NOT NULL,\
-        date TEXT NOT NULL\
+        count INTEGER NOT NULL,\
+        extra TEXT,\
+        date TEXT NOT NULL,\
+        queuenumber INTEGER NOT NULL\
+      )'
+    );
+    
+    //log table which related to queuenumber
+    db.query('\
+      CREATE TABLE logdb.tablenumber (\
+        queuenumber INTEGER UNIQUE NOT NULL,\
+        tablenumber VARCHAR(255) NOT NULL\
       )'
     );
 
@@ -136,20 +147,31 @@ module.exports.init = ()=>{
       )'
     );
 
+    var date = new Date();
+    var yymmdd = (''+date.getFullYear()).slice(-2) + 
+        ('0'+ (date.getMonth()+1)).slice(-2) + 
+        ('0'+date.getDate()).slice(-2);
+
     db.query('INSERT INTO savedata VALUES(?,?)',
       [
         'queuenumber',
-        JSON.stringify({'number': 0, 'date': new Date().getDate()})
+        JSON.stringify({'number': 0, 'date': yymmdd})
       ]);
 
     db.query('INSERT INTO savedata VALUES(?,?)',
       [
         'lastbackup',
-        JSON.stringify({'time': new Date().getTime()})
+        JSON.stringify({'time': date.getTime()})
       ]);
 
+    db.query('INSERT INTO savedata VALUES(?,?)',
+      [
+        'hash',
+        '81dc9bdb52d04dc20036dbd8313ed055' //default password is 1234
+      ]);
+
+    //create index to optimize the log processing speed 
     db.query('CREATE INDEX logdb.date_index ON log (date ASC)');
- //create unique index m.qwe on users (name);
   }
 }
 
@@ -223,18 +245,51 @@ module.exports.getstatistics = async (startdate,enddate,periodmin)=>{
       var date1 = data.dates[index].getTime(),
           date2 = data.dates[index+1].getTime();
       var itemlogs = await query('SELECT * FROM logdb.log WHERE itemid = ? AND date > ? AND date < ?',
-        [item.id, date1, date2], {'price': Number});
+        [item.id, date1, date2], {'count': Number, 'price': Number});
        
-      itemlogdata.counts[index]=itemlogs.length;
+      //sum of count and price
+      itemlogdata.counts[index]=0;
       itemlogdata.prices[index]=0;
       itemlogs.forEach((itemlog)=>{
-        itemlogdata.prices[index]+=itemlog.price;
+        itemlogdata.counts[index]+=itemlog.count;
+        itemlogdata.prices[index]+=itemlog.price*itemlog.count;
       });
     }
     data.items.push(itemlogdata);
   }
 
   return data;
+}
+
+// recover order or check order from log, needed when amend order
+module.exports.getOrder = async (queuenumber)=>{
+  var tablenumber = await query('SELECT tablenumber FROM logdb.tablenumber WHERE queuenumber = ?', [queuenumber], ['tablenumber']);
+  tablenumber = tablenumber[0].tablenumber;
+  var log_items = await query('SELECT * FROM logdb.log WHERE queuenumber = ?', [queuenumber], 
+    {'itemid': String, 'price': Number, 'count': Number, 'extra':String, 'date':Number, 'queuenumber':Number});
+
+  var order = {
+    'tablenumber': tablenumber,
+    'items': [],
+  };
+
+  for(var c=0;c<log_items.length;c++){
+    var log_item = log_items[c];
+    // format log_item
+
+    //rename prop
+    log_item.id = log_item.itemid; delete log_item.itemid;
+
+    var db_item = (await query('SELECT name,printer FROM items WHERE id = ?', [log_item.id]))[0];
+    log_item.name = db_item.name;
+    log_item.printer = db_item.printer;
+    var extra = JSON.parse(log_item.extra);
+    log_item.extra = extra.extra;
+    log_item.remarks = extra.remarks;
+
+    order.items[c] = log_item;
+  }
+  return order;
 }
 
 
@@ -244,19 +299,28 @@ module.exports.getPrinter = async (printername)=>{
   return res;
 };
 
+module.exports.getHash = async ()=>{
+  var hash = await query('SELECT value FROM savedata WHERE selector = "hash"');
+  hash = hash[0].value;
+  return hash;
+}
 
 module.exports.getqueuenumber = async ()=>{
-  var queuenumber = await query('SELECT value FROM savedata WHERE selector = "queuenumber"');
-  queuenumber = queuenumber[0].value;
-  queuenumber = JSON.parse(queuenumber);
+  var date = new Date();
+  date = (''+date.getFullYear()).slice(-2) + 
+    ('0'+ (date.getMonth()+1)).slice(-2) + 
+    ('0'+date.getDate()).slice(-2); //yymmdd
 
-  if(queuenumber.date!=new Date().getDate()){
+  var queuenumber = await query('SELECT value FROM savedata WHERE selector = "queuenumber"');
+  queuenumber = JSON.parse(queuenumber[0].value);
+
+  if(queuenumber.date!=date){
     queuenumber.number = 0;
   }
   else{ queuenumber.number++; }
-  await query('UPDATE savedata SET value = ? WHERE selector = "queuenumber"', [JSON.stringify({'number': queuenumber.number, 'date': new Date().getDate()})]);
+  await query('UPDATE savedata SET value = ? WHERE selector = "queuenumber"', [JSON.stringify({'number': queuenumber.number, 'date': date})]);
  
-  return queuenumber.number;
+  return date+('000'+queuenumber.number).slice(-4);
 };
 
 module.exports.update_last_backup_date = async ()=>{
@@ -269,21 +333,39 @@ module.exports.update_last_backup_date = async ()=>{
 
 module.exports.log = async (data)=>{
   //type, date
+  
   await query('BEGIN TRANSACTION');
+  //if this is amend order, delete the previos order and make a new one
+  if(data.amendid){
+    await query('DELETE FROM logdb.log WHERE queuenumber = ?', [data.amendid]);
+  }
+
+  //relate the table with queuenumber
+  await query('INSERT INTO logdb.tablenumber VALUES(?,?)',
+    [
+      data.queuenumber,
+      data.tablenumber
+    ]);
+
   for(c=0; c<data.items.length; c++){
     var item = data.items[c];
-    for(d=0; d<item.count; d++){
-      await query('INSERT INTO log VALUES(?,?,?)',
-        [
-          item.id,  //itemid
-          parseFloat(item.price), //price
-          new Date().getTime() //date
-        ]);
-    }
+    var extra = {extra: item.extra, remarks: item.remarks}
+    await query('INSERT INTO logdb.log VALUES(?,?,?,?,?,?)',
+      [
+        item.id,  //itemid
+        parseFloat(item.price), //price
+        item.count, //item
+        JSON.stringify(extra), //extra and remarks
+        new Date().getTime(), //date
+        data.queuenumber  //queue number
+      ]);
   }
+
+  
 
   await query('END TRANSACTION');
 }
+
 
 module.exports.add = async (data)=>{
   
@@ -451,6 +533,13 @@ module.exports.update = async (data)=>{
 
         data.item.id
       ]);
+      break;
+
+    case 'password':
+      if(data.oldpass !== await this.getHash()){
+        throw new Error('Wrong Password');
+      }; 
+      await query('UPDATE savedata SET value = ? WHERE selector = "hash"',[data.newpass]);
       break;
   
     case 'category_position':

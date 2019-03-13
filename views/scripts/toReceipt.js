@@ -21,10 +21,13 @@ ToReceipt.prototype.getImages = function(data, code){
     receipt.addText("Table: ", { fontsize: receipt.fontsize.h4 });//+ data.tablenumber);
     receipt.addText(data.tablenumber, { fontsize: receipt.fontsize.h2 });
     
+    receipt.newline();
     var date = new Date();
     receipt.addText(
-      (date.getMonth()+1) + '/'+date.getDate() + '|' + date.getHours() + ':' + date.getMinutes() + ' | ' + code,
-      { fontsize: receipt.fontsize.h4, align:'right' }
+      (data.amendid !== undefined ? 'amend #'+data.amendid+' |' : '') +
+      (date.getHours() + ':' + date.getMinutes() + ' | ') + 
+      code,
+      { fontsize: receipt.fontsize.h5, align:'right' }
     );
 
     receipt.println();
@@ -48,11 +51,15 @@ ToReceipt.prototype.getImages = function(data, code){
       for(var d=0; d<item.extra.length; d++){
         extra_text.push(item.extra[d].text);
       }
-      extra_text = extra_text.length>0 ? extra_text.join()+' / ' : '';
+      extra_text = extra_text.length>0 ? extra_text.join() : '';
+
       var remarks_text = item.remarks.length>0 ? item.remarks.join() : '';
-      var extratext = (extra_text||remarks_text) ?  '*( ' + extra_text + item.remarks.join() + ' )' : '';
+
+      var text_divider = (extra_text.length>0&&item.remarks.length>0) ? ' | ' : '';
+
+      var extratext = (extra_text||remarks_text) ?  '*( ' + extra_text + text_divider + item.remarks.join() + ' )' : '';
       if(extratext){
-        receipt.addText(extratext, {x: 20});
+        receipt.addText(extratext, { fontsize: receipt.fontsize.h4, x: 20});
         receipt.println();
       }
     }

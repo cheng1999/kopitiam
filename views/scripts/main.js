@@ -1,45 +1,46 @@
-var data = {
+window.data = {
       'items':{},
       'tablenumber': [],
       'remarks': []
-    }, 
-    order = {
+    }; 
+window.order = {
       'tablenumber': '',
       'totalprice': 0,
       'items': [],
       'images': [], //receipt image
-    },
-    resetorder = JSON.parse(JSON.stringify(order));//make a clone for reset after order
+    };
+    var resetorder_sample = JSON.parse(JSON.stringify(order));//make a clone for reset after order
 
 var sendOrderButton = $('#sendOrderButton');
 var canvas=  document.getElementById('receipt');
 var receipt = new Receipt(canvas);
 var toReceipt = new ToReceipt(receipt);
 
-$.getJSON('init', function(thisdata) {
+$.getJSON('init', function(data) {
+  console.log('this is fresh');
   //data is the JSON string
-  data = thisdata;
+  window.data = data;
   init();
 });
 
 function init(){
   //reform the json data so it will be include some extra data
-  data.items.forEach(function(item){
+  window.data.items.forEach(function(item){
     item.count = 0;
   });
 
 
   //reset order
-  order = JSON.parse(JSON.stringify(resetorder));
+  order = JSON.parse(JSON.stringify(resetorder_sample));
 
   //init every vue objects' data variable
-  extraorder.datalink = data;
-  extraorder.orderlink = order;
-  tablenum.tablenumber = data.tablenumber;
-  tablenum.orderlink = order;
-  checkorder.orderlink = order;
-  cat.datalink = data;
-  cat.showcat(data.categories[0]);
+  extraorder.datalink = window.data;
+  extraorder.orderlink = window.order;
+  tablenum.tablenumber = window.data.tablenumber;
+  tablenum.orderlink = window.order;
+  checkorder.orderlink = window.order;
+  cat.datalink = window.data;
+  cat.showcat(window.data.categories[0]);
   
 
   sendOrderButton.prop('disabled', false);
@@ -48,35 +49,21 @@ function init(){
   //init layout view
   $('.layout').hide();
   toggleto('#tablenum','#tablenum');
-
-  //take reference to https://vuejs.org/v2/api/#Vue-nextTick
-  //Vue.nextTick(function(){
-    //semantic's function: combine menu and tab together,
-    //when menu item was clicked, tab will show as item clicked
-    //$('#menu .item').tab(); 
-    //makesure there's no actived tab, then active first tab
-    //$('#menu .item').removeClass('active');
-    //$('#items').removeClass('active');
-    //active first tab
-    //$('#menu .item')[0].className+=' active';
-    //$('#menu .tab')[0].className+=' active';
-    //$('.ui.modal.tablenum').modal('show');
-  //});
+  $('.dropdown').dropdown();
+  $('.modal').modal();
 }
-
-  //sort the items
-  //referrence: http://www.c-sharpcorner.com/UploadFile/fc34aa/sort-json-object-array-based-on-a-key-attribute-in-javascrip/
-  //Comparer Function  
-  function GetSortOrder(prop) {  
-    return function(a, b) {  
-      if (a[prop] > b[prop]) {  
-        return 1;  
-      } else if (a[prop] < b[prop]) {  
-        return -1;  
-      }  
-      return 0;  
-    }; 
-  } 
+//referrence: http://www.c-sharpcorner.com/UploadFile/fc34aa/sort-json-object-array-based-on-a-key-attribute-in-javascrip/
+//Comparer Function  
+function GetSortOrder(prop) {  
+  return function(a, b) {  
+    if (a[prop] > b[prop]) {  
+      return 1;  
+    } else if (a[prop] < b[prop]) {  
+      return -1;  
+    }  
+    return 0;  
+  }; 
+}
 
 function sendorder(){
 
@@ -93,54 +80,94 @@ function sendorder(){
     item.remarks.sort();
   });
 
+  //format the order
   order.items.forEach(function(item){
-    //reset counting of item
-    //item.itemlink.count=0;
-    //delete **itemlink which is useless for serverside before sending data
     delete item.itemlink;
-    
   });
 
-  var code;
+  function ajaxerror(data){
+    order = backuporder;
+    alert(data.responseText);
+
+    sendOrderButton.prop('disabled', false);
+    sendOrderButton.prop('value','Send');
+  }
+
+  var queuenumber;
   $.ajax({
     url: 'getnumber', 
     type: 'POST',
     async: false,
-    success: function(thisdata) {
-      code = thisdata;
+    success: function(data) {
+      queuenumber = data;
+    },
+    error: function(data){
+      ajaxerror(data);
     }
     //data is the JSON string
   });
+  // don't continue if getnumber ajax returned error
+  if (queuenumber === undefined) return;
 
-  order.images = toReceipt.getImages(order, code);
+  order.queuenumber = parseInt(queuenumber);
+  order.images = toReceipt.getImages(order, '#'+queuenumber);
 
   var orderclone = JSON.parse(JSON.stringify(order));
 
   //send order
-    $.ajax({
-      url: 'order',
-      type: 'POST',
-      data: JSON.stringify(orderclone),
-      dataType: 'html',
-      //async: false,
-      success: function(data) {
-        //toggleto('#home','#tablenum');
-        init();
-      },
-      error: function (data) {
-        order = backuporder;
-        //temp=data;
-        alert(data.responseText);
-
-        sendOrderButton.prop('disabled', false);
-        sendOrderButton.prop('value','Send');
+  $.ajax({
+    url: 'order',
+    type: 'POST',
+    data: JSON.stringify(orderclone),
+    //dataType: 'html',
+    //async: false,
+    success: function() {
+      //toggleto('#home','#tablenum');
+      init();
+    },
+    error: function(data){
+      ajaxerror(data);
     }
   });
 }
-//var temp;
+
+function amendorder(){
+  var id = $('#amend_id').val(),
+    hash = $.MD5($('#amend_password').val());
+
+  $('#amend_password').val('');
+  $.ajax({
+    url: 'getorder', 
+    type: 'POST',
+    data: JSON.stringify({
+      'id': id,
+      'hash':hash 
+    }),
+    async: false,
+    success: function(data) {
+      window.order = data;
+      window.order.amendid = id;
+      window.order.amendhash = hash;
+      window.order.totalprice = 0;
+      data.items.forEach(function(item){
+        window.order.totalprice += item.count*item.price;
+      });
+
+
+      extraorder.orderlink = window.order;
+      tablenum.orderlink = window.order;
+      checkorder.orderlink = window.order;
+      toggleto('#tablenum','#home');
+    },
+    error: function(data){
+      alert(data.responseText);
+    }
+    //data is the JSON string
+  });
+}
 
 //to check if order is repeated, 
-//then simply do count++ but not make a new order with same data
+//then simply do count++ but not make a new list with same data
 function checkrepeated(order_tocheck){
   //clone it, so it is not a link
   order_tocheck = JSON.parse(JSON.stringify(order_tocheck));
@@ -149,13 +176,15 @@ function checkrepeated(order_tocheck){
     var item = order.items[c];
     if(order_tocheck.id !== order.items[c].id)continue;
 
-    //count maynot same even order are same
-    order_tocheck.count = order.items[c].count;
-    // check if order is totally same
-    if(JSON.stringify(order_tocheck) === JSON.stringify(order.items[c])){
+    //if same item, then dig in to check are their remarks and extra same
+    //check if they are totally same
+    if(JSON.stringify(order_tocheck.remarks) === JSON.stringify(order.items[c].remarks) &&
+      JSON.stringify(order_tocheck.extra) === JSON.stringify(order.items[c].extra)
+    ){
       order.items[c].count++;
       return true;
     }
+    return false;
   }
   //reset count
   return false;
@@ -165,13 +194,12 @@ function checkrepeated(order_tocheck){
 var urlhash_times=0;
 var previousid;
 function toggleto(currentid, targetid){
-  urlhash_times++; location.hash = urlhash_times;
+  //urlhash_times++; location.hash = urlhash_times;
   previousid = currentid;
   $(currentid).hide();
   $(targetid).show();
 }
 function back(){
-  urlhash_times++; location.hash = urlhash_times;
   //if home is visible, of coz previousid is #tablenum
   var homeshown = $('#home').is(':visible');
   previousid = (homeshown ? '#tablenum' : previousid);
@@ -179,14 +207,6 @@ function back(){
   $('.layout').hide();
   $(previousid).show();
 }
-//listen back button of device
-window.onhashchange = function(){     
-  var thistimes = parseInt(location.hash.replace('#',''),10);     
-  //if hash was minus 1, mean back button pressed
-  if(thistimes == urlhash_times-1){
-    back();
-  }
-};
 
 //vue objects
 var tablenum = new Vue({
@@ -336,3 +356,34 @@ var cat = new Vue({
   }
 });
 
+// TODO add service worker code here
+/*
+if ('serviceWorker' in navigator) {
+navigator.serviceWorker
+  .register('./service-worker.js')
+  .then(function() { console.log('Service Worker Registered'); });
+}
+if ('caches' in window) {
+  /*
+   * Check if the service worker has already cached this city's weather
+   * data. If the service worker has the data, then display the cached
+   * data while the app fetches the latest data.
+   */
+/*
+  caches.match('https://192.168.0.111:8081/init').then(function(response) {
+    if (response) {
+      response.json().then(function updateFromCache(json) {
+        console.log('this is caching');
+        //var results = json.query.results;
+        data = json;
+        init();
+        //results.key = key;
+        //results.label = label;
+        //results.created = json.query.created;
+        //app.updateForecastCard(results);
+        
+      });
+    }
+  });
+}
+*/

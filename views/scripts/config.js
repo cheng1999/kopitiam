@@ -1,14 +1,4 @@
 window.data={};
-//var data = window.data;
-/*
-$.getJSON('init', function(thisdata) {
-  //data is the JSON string
-  data = thisdata;
-  window.data = thisdata;
-  init();
-});
-var temp;
-*/
 
 //initial
 refresh_data(init);
@@ -58,7 +48,6 @@ function init(){
     //https://stackoverflow.com/a/12962399/5617437
     $("#draggable_categories, #draggable_table, #draggable_items, #draggable_remarks, #draggable_extra").addClass("sortable");
     $(".sortable").sortable({
-      //handle: '.drag_handle',
       start: function(event, ui) {
         ui.item.position_bfr = ui.item.index();
       },
@@ -96,11 +85,9 @@ function init(){
             }
           },
           success: function(data){
-          refresh_data(function(){});
-            //vueItems.shift_position(ui.item.position_bfrs, ui.item.position_after); 
+            refresh_data(function(){});
           },
           error: function(data){
-            //vueItems.sort_position();
             alert(JSON.stringify(data));
             alert('error occur, please reload and try again');
           }
@@ -159,15 +146,6 @@ var vueForm = new Vue({
       'background':'#ffffff',
       'font':'#555555',
     },
-    //'class': '',
-     /*
-      'modify': {
-        'type':'modify',
-        'class': 'ui modal',
-        'item': {} //will be given value when modify modal poped
-      },
-    ],
-    */
   },
   methods: {
 
@@ -184,8 +162,6 @@ var vueForm = new Vue({
           }
         },
         success: function(data){
-          //datalink.items.push(JSON.parse(data));
-          //window.data.items.push(JSON.parse(data));
           refresh_data(function(){vueItemMenu.showcat(window.clicked_category)});
           
           $('#item_form.ui.modal').modal('hide');
@@ -215,28 +191,15 @@ var vueForm = new Vue({
         data:{
           'remove':{
             'target':'items',
-            //'id':this.item.id
             'id':itemid
           }
         },
         success: function(data){
-          //refresh_data(function(){});
           refresh_data(function(){vueItemMenu.showcat(window.clicked_category)});
-          /*
-          for(var c=0; c<datalink.items.length; c++){
-            if(datalink.items[c].id === item.id){
-              datalink.items.splice(c,1);
-              //console.log(datalink.items.splice(c));
-              break;
-              //c--;
-            }
-          }
-          */
         },
       });
     },
    'modify_modal': function(item){
-      //this.formtypes[1].bakcupitem = JSON.parse(JSON.stringify(item));
       this.type = 'modify'; 
       this.item = item; 
       //semantic ui dropdown doesn't show default value so use following codes
@@ -246,17 +209,6 @@ var vueForm = new Vue({
     },
     'add_modal': function(){
       this.type = 'add';
-      /*
-      this.item =  {
-      'name':'',
-      'category':'',
-      'printer':'',
-      'price': 0,
-      'background':'#ffffff',
-      'font':'#555555',
-      };
-      */
-
       $('.ui.modal').modal('show');
     }
 
@@ -280,14 +232,6 @@ var vueItems = new Vue({
         'font':'#555555',
         }
     },
-      /*
-      'modify': {
-        'type':'modify',
-        'class': 'ui modal',
-        'item': {} //will be given value when modify modal poped
-      },
-    ],
-    */
   },
   methods: {
 
@@ -305,8 +249,6 @@ var vueItems = new Vue({
         },
         success: function(data){
           refresh_data(function(){vueItemMenu.showcat(window.clicked_category)});
-          //datalink.items.push(JSON.parse(data));
-          //data.items.push(JSON.parse(data));
         },
       });
     },
@@ -337,16 +279,6 @@ var vueItems = new Vue({
         },
         success: function(data){
           refresh_data(function(){vueItemMenu.showcat(window.clicked_category)});
-          /*
-          for(var c=0; c<datalink.items.length; c++){
-            if(datalink.items[c].id === item.id){
-              datalink.items.splice(c,1);
-              //console.log(datalink.items.splice(c));
-              break;
-              //c--;
-            }
-          }
-          */
         },
       });
     },
@@ -441,7 +373,6 @@ var vuePrinters = new Vue({
         },
         success: function(data){
           refresh_data(function(){});
-          //datalink.printers.push(JSON.parse(data));
         },
       });
     },
@@ -456,16 +387,6 @@ var vuePrinters = new Vue({
         },
         success: function(data){
           refresh_data(function(){});
-          /*
-          for(var c=0; c<datalink.printers.length; c++){
-            if(datalink.printers[c].id === printer.id){
-              datalink.printers.splice(c,1);
-              //console.log(datalink.items.splice(c));
-              break;
-              //c--;
-            }
-          }
-          */
         },
       });
     }
@@ -493,9 +414,7 @@ var vueTablenum = new Vue({
         success: function(data){
           refresh_data(function(){
             vueTablenum.form.number='';
-            //$("#tablenum .input input").val('');
           });
-          //datalink.tablenumber.push(JSON.parse(data));
         },
       });
     },
@@ -510,15 +429,6 @@ var vueTablenum = new Vue({
         },
         success: function(data){
           refresh_data(function(){});
-          /*
-          for(var c=0; c<datalink.tablenumber.length; c++){
-            if(datalink.tablenumber[c].id === table.id){
-              console.log(table.id);
-              datalink.tablenumber.splice(c,1);
-              break;
-            }
-          }
-          */
         },
       });
     }
@@ -548,18 +458,6 @@ var vueExtra = new Vue({
         },
         success: function(data){
           refresh_data(function(){});
-          /*
-          var targetlink;
-          switch(target){
-            case 'extra':
-              targetlink = datalink.extra;
-              break;
-            case 'remarks':
-              targetlink = datalink.remarks;
-              break;
-          }
-          targetlink.push(JSON.parse(data));
-          */
         },
       });
     },
@@ -575,24 +473,49 @@ var vueExtra = new Vue({
         },
         success: function(data){
           refresh_data(function(){});
-          /*
-          var targetlink;
-          switch(target){
-            case 'extra':
-              targetlink = datalink.extra;
-              break;
-            case 'remarks':
-              targetlink = datalink.remarks;
-              break;
-          }
-          for(var c=0; c<targetlink.length; c++){
-            if(targetlink[c].id === id){
-              targetlink.splice(c,1);
-              break;
-            }
-          }
-          */
         },
+      });
+    },
+  }
+});
+var vueGeneral = new Vue({
+  el: '#general',
+  data: {
+    'passwordform':{
+      'oldpass': '',
+      'newpass': '',
+      'comfirmpass': ''
+    },
+  },
+  methods: {
+    'changepassword': function(){
+      var oldpass = this.passwordform.oldpass,
+          newpass = this.passwordform.newpass,
+          comfirmpass = this.passwordform.comfirmpass;
+
+      if(this.passwordform.newpass !== this.passwordform.comfirmpass){
+        alert('Password Don\'t Match');
+        return;
+      }
+      sendAjax({
+        data:{
+          'update':{
+            'target': 'password',
+            'oldpass': $.MD5(oldpass),
+            'newpass': $.MD5(newpass),
+          }
+        },
+        success: function(data){
+          //delete cookie, logout
+          document.cookie = 'hash' + '=; Max-Age=0'
+          location.reload();
+        },
+        error: function(data){
+          alert(data.responseText);
+          vueGeneral.passwordform.oldpass = '';
+          vueGeneral.passwordform.newpass = '';
+          vueGeneral.passwordform.comfirmpass = '';
+        }
       });
     },
   }

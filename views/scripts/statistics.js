@@ -63,12 +63,14 @@ function loaddata(){
   });
 }
 
+/*
 var chartdata = {
     //type: 'line',
     labels: [],
     datasets: [],
   },
   reset_chartdata = JSON.parse(JSON.stringify(chartdata));
+*/
 
 var table = [];
 
