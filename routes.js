@@ -27,6 +27,7 @@ module.exports = async (req,res)=>{
   }
 };
 
+// validate functions
 var validate_hash = async(res, hash)=>{
   if (hash === await dbop.getHash()){return true;}
   res.writeHead(403,ctxtype.html);
@@ -44,6 +45,7 @@ var validate_hashcookie = async(res, req)=>{
   res.end(html);
 }
 
+//router
 var routing = async (req,res)=>{
 
   switch(req.url){

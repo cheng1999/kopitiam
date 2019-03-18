@@ -17,7 +17,6 @@ var receipt = new Receipt(canvas);
 var toReceipt = new ToReceipt(receipt);
 
 $.getJSON('init', function(data) {
-  console.log('this is fresh');
   //data is the JSON string
   window.data = data;
   init();
@@ -47,8 +46,8 @@ function init(){
   sendOrderButton.prop('value','Send');
 
   //init layout view
-  $('.layout').hide();
-  toggleto('#tablenum','#tablenum');
+  //$('.layout').hide();
+  toggleto('#tablenum');
   $('.dropdown').dropdown();
   $('.modal').modal();
 }
@@ -157,7 +156,7 @@ function amendorder(){
       extraorder.orderlink = window.order;
       tablenum.orderlink = window.order;
       checkorder.orderlink = window.order;
-      toggleto('#tablenum','#home');
+      toggleto('#home');
     },
     error: function(data){
       alert(data.responseText);
@@ -192,21 +191,38 @@ function checkrepeated(order_tocheck){
 
 //toggle between layout
 var urlhash_times=0;
-var previousid;
-function toggleto(currentid, targetid){
-  //urlhash_times++; location.hash = urlhash_times;
-  previousid = currentid;
-  $(currentid).hide();
+location.hash = 0;
+function toggleto(targetid){
+  location.hash = ++urlhash_times;
+  $('.layout').hide();
   $(targetid).show();
 }
 function back(){
+  urlhash_times--; //location.hash = urlhash_times;
   //if home is visible, of coz previousid is #tablenum
-  var homeshown = $('#home').is(':visible');
-  previousid = (homeshown ? '#tablenum' : previousid);
+  function visible(elementid){
+    return $(elementid).is(':visible');
+  }
+  var targetid = (function(){
+    if(visible('#tablenum')){
+      $('.ui.modal').modal('hide');
+      return '#tablenum';
+    }
+    if(visible('#home')) return '#tablenum';
+    if(visible('#extraorder')) return '#home';
+  })(); 
 
   $('.layout').hide();
-  $(previousid).show();
+  $(targetid).show();
 }
+//listen back button of device
+window.onhashchange = function(){     
+  var thistimes = parseInt(location.hash.replace('#',''),10);     
+  //if hash was minus 1, mean back button pressed
+  if(thistimes == urlhash_times-1){
+    back();
+  }
+};
 
 //vue objects
 var tablenum = new Vue({
@@ -219,7 +235,7 @@ var tablenum = new Vue({
     selectnumber: function(tablenumber){
       init();
       this.orderlink.tablenumber=tablenumber;
-      toggleto('#tablenum','#home');
+      toggleto('#home');
     }
   }
 });
@@ -278,7 +294,7 @@ var extraorder = new Vue({
       //reset
       this.remarks=[];
       this.extraindex=[];
-      toggleto('#extraorder','#home');
+      toggleto('#home');
     }
   }
 });
@@ -351,39 +367,20 @@ var cat = new Vue({
       extraorder.itemlink = item;
       extraorder.remarks = [];
       extraorder.extra = [];
-      toggleto('#home','#extraorder');
+      toggleto('#extraorder');
     }
   }
 });
 
 // TODO add service worker code here
-/*
 if ('serviceWorker' in navigator) {
-navigator.serviceWorker
-  .register('./service-worker.js')
-  .then(function() { console.log('Service Worker Registered'); });
-}
-if ('caches' in window) {
-  /*
-   * Check if the service worker has already cached this city's weather
-   * data. If the service worker has the data, then display the cached
-   * data while the app fetches the latest data.
-   */
-/*
-  caches.match('https://192.168.0.111:8081/init').then(function(response) {
-    if (response) {
-      response.json().then(function updateFromCache(json) {
-        console.log('this is caching');
-        //var results = json.query.results;
-        data = json;
-        init();
-        //results.key = key;
-        //results.label = label;
-        //results.created = json.query.created;
-        //app.updateForecastCard(results);
-        
-      });
-    }
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/scripts/swmain.js').then(function(registration) {
+      // Registration was successful
+      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+    }, function(err) {
+      // registration failed :(
+      console.log('ServiceWorker registration failed: ', err);
+    });
   });
 }
-*/

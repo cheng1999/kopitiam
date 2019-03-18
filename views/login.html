@@ -6,11 +6,10 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
-  <link rel="manifest" href="manifest.json">
   <title>Kopitiam</title>
 </head>
 <body>
-<div >
+<div>
   <div class="ui container" style="margin-top:20vh">
   <div class="ui centered fluid card" style="max-width:450px">
       <div class="content">
@@ -19,7 +18,7 @@
           <label>Password</label>
           <input id="password_input" type="password" placeholder="Password">
         </div>
-        <button class="ui primary labeled icon right floated button" onclick="check()">
+        <button class="ui primary labeled icon right floated button" onclick="login()">
           <i class="unlock alternate icon"></i>
           Login
         </button>
@@ -33,28 +32,44 @@
 <script src="include/jquery-3.2.1.min.js"></script>
 <script src="include/jquery.md5.min.js"></script>
 <script>
-  function check(){
-    var hash = $.MD5($('#password_input').val());
+function login(){
+  var hash = $.MD5($('#password_input').val());
 
-    $.ajax({
-      url: 'login', 
-      type: 'POST',
-      data: hash,
-      async: false,
-      success: function(data) {
-        document.cookie = "hash="+hash;
-        if(location.pathname == '/login.html'){
-          location.replace('/menu.html')
-        }else{
-          location.reload();
-        }
-      },
-      error: function(data){
-        //delete cookie
-        document.cookie = 'hash' + '=; Max-Age=0'
-        alert(data.responseText);
+  $.ajax({
+    url: 'login', 
+    type: 'POST',
+    data: hash,
+    async: false,
+    success: function(data) {
+      document.cookie = "hash="+hash;
+      load_serviceworker();
+      if(location.pathname == '/login.html'){
+        location.replace('/menu.html')
+      }else{
+        location.reload();
       }
+    },
+    error: function(data){
+      //delete cookie
+      document.cookie = 'hash' + '=; Max-Age=0'
+      alert(data.responseText);
+    }
+  });
+}
+
+function load_serviceworker(){
+  // TODO add service worker code here
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/swadmin.js').then(function(registration) {
+        // Registration was successful
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      }, function(err) {
+        // registration failed :(
+        console.log('ServiceWorker registration failed: ', err);
+      });
     });
   }
+}
 </script>
 </html>

@@ -338,6 +338,7 @@ module.exports.log = async (data)=>{
   //if this is amend order, delete the previos order and make a new one
   if(data.amendid){
     await query('DELETE FROM logdb.log WHERE queuenumber = ?', [data.amendid]);
+    await query('DELETE FROM logdb.tablenumber WHERE queuenumber = ?', [data.amendid]);
   }
 
   //relate the table with queuenumber

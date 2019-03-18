@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
   <link rel="stylesheet" type="text/css" href="scripts/main.css">
-  <title>Kopitiam</title>
+  <title>Kopitiam Menu</title>
   <style>
     .advmargin {
       margin-top:1rem!important;
@@ -88,5 +88,18 @@ function load(target){
     }
   });
 }
+
+  // TODO add service worker code here
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/scripts/swadmin.js').then(function(registration) {
+        // Registration was successful
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      }, function(err) {
+        // registration failed :(
+        console.log('ServiceWorker registration failed: ', err);
+      });
+    });
+  }
 </script>
 </html>

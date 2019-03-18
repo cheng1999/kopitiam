@@ -1,35 +1,36 @@
 
 {
-  "name": "Kopitiam",
-  "short_name": "Kopitiam",
+  "name": "Kopitiam Admin",
+  "short_name": "Kopitiam-admin",
   "icons": [{
-    "src": "icons/mdpi.png",
+    "src": "/icons/mdpi.png",
       "sizes": "48x48",
       "type": "image/png"
     }, {
-      "src": "icons/hdpi.png",
+      "src": "/icons/hdpi.png",
       "sizes": "72x72",
       "type": "image/png"
     }, {
-      "src": "icons/xhdpi.png",
+      "src": "/icons/xhdpi.png",
       "sizes": "96x96",
       "type": "image/png"
     }, {
-      "src": "icons/xxhdpi.png",
+      "src": "/icons/xxhdpi.png",
       "sizes": "144x144",
       "type": "image/png"
     }, {
-      "src": "icons/xxxhdpi.png",
+      "src": "/icons/xxxhdpi.png",
       "sizes": "192x192",
       "type": "image/png"
     }, {
-      "src": "icons/web_hi_res_512.png",
+      "src": "/icons/web_hi_res_512.png",
       "sizes": "512x512",
       "type": "image/png"
     }],
-  "start_url": "/index.html",
+  "start_url": "/admin.html",
   "display": "standalone",
   "background_color": "#3E4EB8",
-  "theme_color": "#2F3BA2"
+  "theme_color": "#2F3BA2",
+  "orientation": "landscape"
 }
 
