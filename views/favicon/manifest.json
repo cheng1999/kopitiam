@@ -37,5 +37,10 @@
    "type": "image\/png",
    "density": "4.0"
   }
- ]
+ ],
+  "start_url": "/",
+  "display": "fullscreen",
+  "background_color": "#ceb87b",
+  "theme_color": "#7a5900"
 }
+

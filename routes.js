@@ -188,6 +188,14 @@ var routing = async (req,res)=>{
       //process.exit();
       break;
 
+    case '/login.html':
+      if(await validate_hashcookie(res, req)){
+        var html = await filestream.readfile(appROOT + '/views/menu.html');
+        res.writeHead(200, ctxtype.html);
+        res.end(html);
+      }
+      break;
+
     case '/menu.html':
     case '/config.html':
     case '/statistics.html':

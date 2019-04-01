@@ -5,8 +5,8 @@ var start = new Date();
 start.setHours(6,0,0,0);
 //today's 1900pm
 var end = new Date();
-//end.setHours(23,59,59,999);
-end.setHours(19,0,0,0);
+end.setHours(23,59,59,999);
+//end.setHours(19,0,0,0);
 $('.form_startdate').calendar('set date', start);
 $('.form_enddate').calendar('set date', end);
 

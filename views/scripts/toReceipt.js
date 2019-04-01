@@ -78,7 +78,7 @@ ToReceipt.prototype.getImages = function(data, code){
   }
 
   //return images.replace('data:image/png;base64,','');
-  return images
+  return images;
 }
  
 
