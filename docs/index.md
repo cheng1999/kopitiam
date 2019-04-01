@@ -53,12 +53,12 @@ Note that Certificate trusted only in host 192.168.0.2 and 192.168.1.2, so make 
 ### Step 4:
 Direct to the webapp link as below in Firefox, add to home screen as you need.
 
-- admin panel : `https//your-device-ip:8081/admin.html`
+- admin panel : `https//your-device-ip:8081/admin.html` ** default password : 1234 **
 - order client: `https//your-device-ip:8081/`
-** default password : 1234 **
-> examples: 
-> - admin panel : `https//192.168.0.2:8081/admin.html`
-> - order client: `https//192.168.0.2:8081/`
+
+examples: 
+- admin panel : `https//192.168.0.2:8081/admin.html`
+- order client: `https//192.168.0.2:8081/`
 
 Setup lan printer by yourself.
 more details MAYBE updated next time.
