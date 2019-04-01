@@ -101,7 +101,7 @@
               </a>
             </div>
             <div id="draggable_items" class="four column row nopadding overflowhandler" style="max-height:calc(100vh - 4rem)">
-            <div v-for="item in items"class="ui column nomargin nopadding" style="padding-top:0!important;">
+            <div v-for="item in items" class="ui column nomargin nopadding" style="padding-top:0!important;">
               <a v-on:click.self="vueForm.modify_modal(item)" v-on:mouseDown="window.mousedown_itemid = item.id" class="ui fluid large button drag_handle" v-bind:style="'background-color:' + item.background + ';color:' + item.font" style="height:6rem;padding:0.6rem;font-size:1.3rem">
                 {{ item.name }} 
                 <h5>RM {{ Number(item.price).toFixed(2) }}</h5>
@@ -212,7 +212,7 @@
                     <td colspan="1" class="drag_handle"><i class="caret right icon"></i></td>
                     <td colspan="2">{{ extra.text }}</td>
                     <td colspan="2">RM {{ Number(extra.price).toFixed(2) }}</td>
-                    <td colspan="1" v-on:click="remove('remarks', remark.id)"><i class="x icon"></i></td>
+                    <td colspan="1" v-on:click="remove('extra', extra.id)"><i class="x icon"></i></td>
                     <!--<td v-on:click="cancel(order)" colspan="1" class="ui center aligned fluid button"><i class="small minus icon nomargin"></i></td> --!>
                   </tr>
                 </tbody>

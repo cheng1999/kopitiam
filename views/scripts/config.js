@@ -11,6 +11,7 @@ function refresh_data(callback){
 
     vueForm.datalink = window.data;
     vueItemMenu.datalink = window.data;
+    vueItems.datalink = window.data;
     vuePrinters.datalink = window.data;
     vueTablenum.datalink = window.data;
     vueExtra.datalink = window.data;
@@ -85,7 +86,7 @@ function init(){
             }
           },
           success: function(data){
-            refresh_data(function(){});
+            refresh_data(function(){vueItemMenu.showcat(window.clicked_category)});
           },
           error: function(data){
             alert(JSON.stringify(data));
@@ -311,43 +312,7 @@ var vueItemMenu = new Vue({
         }
       });
       this.items = cat_items;
-    },
-    //the item which change position
-    //shift the position
-    'shift_position': function(startPosition, endPosition){
-      var itemslink = this.datalink.items;
-      //use to shift up or down
-      var plus_or_minus = startPosition>endPosition ? 1 : -1;
-      for (var c=0;c<itemslink.length;c++){
-        //between this two position
-        if( (itemslink[c].position>startPosition && itemslinks[c].position<=endPosition) ||
-            (itemslink[c].position<startPosition && itemslinks[c].position>=endPosition) ){
-          itemslink[c].position += plus_or_minus;
-        }
-      }
-      //this.clicked_item.position = endPosition;
-      this.sort_position();
-
-    },
-    'sort_position': function(){
-      //sort the items
-      //referrence: http://www.c-sharpcorner.com/UploadFile/fc34aa/sort-json-object-array-based-on-a-key-attribute-in-javascrip/
-      //Comparer Function  
-      function GetSortOrder(prop) {  
-        return function(a, b) {  
-          if (a[prop] > b[prop]) {  
-            return 1;  
-          } else if (a[prop] < b[prop]) {  
-            return -1;  
-          }  
-          return 0;  
-        }; 
-      }  
-      this.$forceUpdate();
-      console.log(JSON.stringify(this.datalink.items.sort(GetSortOrder("position"))));
     }
-  }
-
 });
 
 var vuePrinters = new Vue({
@@ -462,7 +427,7 @@ var vueExtra = new Vue({
       });
     },
     'remove': function(target, id){
-      console.log(target+"-"+id);
+      if(!confirm("Are you sure ?")){return ;}
       var datalink = this.datalink;
       sendAjax({
         data:{
