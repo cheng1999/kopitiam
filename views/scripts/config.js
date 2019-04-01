@@ -313,6 +313,7 @@ var vueItemMenu = new Vue({
       });
       this.items = cat_items;
     }
+  }
 });
 
 var vuePrinters = new Vue({
