@@ -72,7 +72,7 @@ var routing = async (req,res)=>{
 
       //print first then log
       try{
-        //await printer.print(data.images);
+        await printer.print(data.images);
         dbop.log(data);
       }catch(err){
         res.writeHead(500,ctxtype.html);
