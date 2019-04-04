@@ -52,7 +52,7 @@
 </div>
 
 
-<div id="tablenum" class="ui segment layout overflowhandler">
+<div id="tablenum" class="ui segment layout overflowhandler ">
   <div class="ui fixed menu">
     <a class="header item">
       <img class="logo" src="icons/web_hi_res_512.png">
@@ -67,8 +67,8 @@
     </div>
   </div>
   <div class="ui grid container">
-    <div v-for="table in tablenumber" class="four wide column">
-      <a v-on:click="selectnumber(table.number)" class="ui fluid huge button">{{table.number}}</a>
+    <div v-for="table in tablenumber" class="four wide column ">
+      <div v-on:click="selectnumber(table.number)" class="ui fluid huge button">{{table.number}}</div>
     </div>
   </div>
 </div>
@@ -175,8 +175,8 @@
           {{ category.name }}
         </div>
       </div>
-      <div class="four column row nopadding overflowhandler" style="max-height:calc(100vh - 4rem)">
-      <div v-for="item in items"class="ui column nomargin nopadding" style="padding-top:0!important;">
+      <div class="doubling four column row nopadding overflowhandler" style="max-height:calc(100vh - 4rem)">
+      <div v-for="item in items"class="column nomargin nopadding" style="padding-top:0!important;">
         <a v-on:click="order(item)" class="ui fluid button" v-bind:style="'background-color:' + item.background + ';color:' + item.font" style="height:6rem;padding:0.6rem;font-size:1.3rem">
           {{ item.name }}
           <h5>RM {{ Number(item.price).toFixed(2) }}</h5>
@@ -193,7 +193,7 @@
 
 <canvas id="receipt" class="ui modal"></canvas>
 
-<script src="include/jquery-3.2.1.min.js"></script>
+<script src="include/jquery-3.3.1.min.js"></script>
 <script src="include/jquery.md5.min.js"></script>
 <script src="include/vue.min.js"></script>
 <script src="include/semantic.min.js"></script>

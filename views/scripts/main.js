@@ -375,7 +375,7 @@ var cat = new Vue({
 // TODO add service worker code here
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/scripts/swmain.js').then(function(registration) {
+    navigator.serviceWorker.register('/swmain.js').then(function(registration) {
       // Registration was successful
       console.log('ServiceWorker registration successful with scope: ', registration.scope);
     }, function(err) {

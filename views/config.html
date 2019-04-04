@@ -100,8 +100,8 @@
                 {{ category.name }}
               </a>
             </div>
-            <div id="draggable_items" class="four column row nopadding overflowhandler" style="max-height:calc(100vh - 4rem)">
-            <div v-for="item in items" class="ui column nomargin nopadding" style="padding-top:0!important;">
+            <div id="draggable_items" class="doubling four column row nopadding overflowhandler" style="max-height:calc(100vh - 4rem)">
+            <div v-for="item in items" class="column nomargin nopadding" style="padding-top:0!important;">
               <a v-on:click.self="vueForm.modify_modal(item)" v-on:mouseDown="window.mousedown_itemid = item.id" class="ui fluid large button drag_handle" v-bind:style="'background-color:' + item.background + ';color:' + item.font" style="height:6rem;padding:0.6rem;font-size:1.3rem">
                 {{ item.name }} 
                 <h5>RM {{ Number(item.price).toFixed(2) }}</h5>
@@ -205,7 +205,7 @@
                   </tr>
                 </thead>
             </table>
-            <div class="overflowhandler nopadding" style="height:75vh">
+            <div class="overflowhandler nopadding" style="height:calc(100vh - 13rem)">
               <table class="ui fixed structured unstackable table">
                 <tbody id=draggable_extra>
                   <tr v-for="extra in datalink.extra" v-on:mouseDown="window.mousedown_itemid = extra.id">
@@ -235,7 +235,7 @@
                   </tr>
                 </thead>
             </table>
-            <div class="overflowhandler nopadding" style="height:75vh">
+            <div class="overflowhandler nopadding" style="height:calc(100vh - 13rem)">
               <table class="ui fixed structured unstackable table">
                 <tbody id=draggable_remarks>
                   <tr v-for="remark in datalink.remarks" v-on:mouseDown="window.mousedown_itemid = remark.id">
@@ -276,7 +276,7 @@
     </div>
   </div>
 </div>
-<script src="include/jquery-3.2.1.min.js"></script>
+<script src="include/jquery-3.3.1.min.js"></script>
 <script src="include/jquery.md5.min.js"></script>
 <script src="include/jquery-ui-sortable.min.js"></script>
 <script src="include/jquery.ui.touch-punch.min.js"></script> <!--http://touchpunch.furf.com/--!>

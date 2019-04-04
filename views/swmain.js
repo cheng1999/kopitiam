@@ -1,31 +1,21 @@
 
 var _CACHE = {
-  'admin' : {
-    'name': 'admin-v1',
+  'main' : {
+    'name': 'main-v1',
     'urls': [
       '/icons/web_hi_res_512.png',
       '/scripts/receipt.js',
       '/scripts/main.js',
       '/scripts/main.css',
       '/scripts/toReceipt.js',
-      '/scripts/config.js',
-      '/scripts/statistics.js',
-      '/include/jquery-3.2.1.min.js',
+      '/include/jquery-3.3.1.min.js',
       '/include/vue.min.js',
       '/include/semantic.min.js',
       '/include/semantic.min.css',
       '/include/jquery.md5.min.js',
-      '/include/jquery-ui-sortable.min.js',
-      '/include/jquery.ui.touch-punch.min.js',
-      '/include/calendar.min.css',
-      '/include/calendar.min.js',
-      '/include/tablesort.min.js',
       '/include/themes/default/assets/fonts/icons.woff2',
+      '/main.html',
       '/index.html',
-      '/login.html',
-      '/admin.html',
-      '/statistics.html',
-      '/config.html',
       '/',
     ]
   }
@@ -39,17 +29,24 @@ var _CACHE_DATA = {
   }
 }
 
-var cacheWhitelist = [_CACHE.admin.name, _CACHE_DATA.main.name];
+var cacheWhitelist = [_CACHE.main.name, _CACHE_DATA.main.name];
 //var cacheWhitelist = [];
 
 self.addEventListener('install', function(e) {
   //self.skipWaiting();
   // Perform install steps
   e.waitUntil(
-    caches.open(_CACHE.admin.name)
+    caches.open(_CACHE.main.name)
       .then(function(cache) {
         console.log('Opened cache');
-        return cache.addAll(_CACHE.admin.urls);
+        return cache.addAll(_CACHE.main.urls);
+      })
+  );
+  e.waitUntil(
+    caches.open(_CACHE_DATA.main.name)
+      .then(function(cache) {
+        console.log('Opened cache');
+        return cache.addAll(_CACHE_DATA.main.urls);
       })
   );
 });
@@ -70,8 +67,10 @@ self.addEventListener('activate', function(e) {
 });
 
 self.addEventListener('fetch', function(e) {
+  console.log('fetch');
 
 var urlpath = new URL(e.request.url).pathname;
+  console.log(urlpath);
  if (_CACHE_DATA.main.urls.indexOf(urlpath) > -1) {
     /*
      * When the request URL contains dataUrl, the app is asking for fresh
@@ -91,7 +90,7 @@ var urlpath = new URL(e.request.url).pathname;
             console.log('cache data');
             return response;
           })
-        })
+        });
       })
     );
   }
