@@ -464,12 +464,13 @@ module.exports.remove = async (data)=>{
       
       var listcount = query_count(await query('SELECT count(*) FROM items WHERE category = ?', [item.category], ['count'])); 
       if(listcount == 0){ //number of items which is in same category
-        var category = await query('SELECT category,position FROM items WHERE id = ?', [data.id],
-          { category: String, position: Number });
-        category = category[0];
+        var category_position = await query('SELECT position FROM categories WHERE name = ?', [item.category],
+          { position: Number });
+        category_position = category_position[0].position;
 
+        console.log(category_position);
         await query('DELETE FROM categories WHERE name = ?', [item.category]);
-        await query('UPDATE categories SET position = position - 1 WHERE position > ?', [category.position]);
+        await query('UPDATE categories SET position = position - 1 WHERE position > ?', [category_position]);
       }else{
 
         //shift the items position to replace the removed item
