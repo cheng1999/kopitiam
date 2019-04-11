@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <link rel="stylesheet" type="text/css" href="/include/semantic.min.css">
+  <link rel="manifest" href="/icons/admin_manifest.json">
+  <link rel="icon" type="image/png" href="/icons/web_hi_res_512.png">
+
+  <script src="/include/jquery-3.3.1.min.js"></script>
+  <script src="/include/jquery.md5.min.js"></script>
+  <script src="/include/vue.min.js"></script>
+  <script src="/include/semantic.min.js"></script>
+  <script src="/include/tablesort.min.js"></script>
+
+  <script src="/scripts/admin.js"></script>
+
+  <title>Kopitiam</title>
+
+</head>
+
+<body>
+<div id="login_page" class="include_page" include_page="/admin/login.html"></div>
+<div id="menu_page" class="include_page" include_page="/admin/menu.html"></div>
+<div id="config_page" class="include_page"><div include_page="/admin/config.html"></div></div>
+<div id="statistics_page" class="include_page"><div include_page="/admin/statistics.html"></div></div>
+
+  <!--<iframe src="/login.html" style="border:none; height:100%; width:100%">-->
+  <!--</iframe>-->
+</body>
+
+<script>
+$(function(){
+  var include_pages = $('[include_page]');
+  $('[include_page]').each(function(){
+    $(this).load($(this).attr('include_page'));
+  });
+  $('.include_page').hide();
+
+  function getCookie(name) {
+    var value = "; " + document.cookie;
+    var parts = value.split("; " + name + "=");
+    if (parts.length == 2) return parts.pop().split(";").shift();
+  }
+  if(getCookie('hash')){
+    admin_app.load(admin_app.pages.menu);
+    location.hash=0;
+  }else{
+    $('#login_page').show();
+  }
+
+  //listen back button of device
+  window.onhashchange = function(){     
+    var  page_index= parseInt(location.hash.replace('#',''),10);     
+    console.log(page_index);
+    if(page_index == 0){
+      admin_app.load(admin_app.pages.menu);
+    }
+  };
+});
+</script>
+
+</html>

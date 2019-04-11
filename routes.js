@@ -29,20 +29,22 @@ module.exports = async (req,res)=>{
 
 // validate functions
 var validate_hash = async(res, hash)=>{
-  if (hash === await dbop.getHash()){return true;}
-  res.writeHead(403,ctxtype.html);
-  res.end('Wrong password');
-  return false;
+  if(hash !== await dbop.getHash()){
+    res.writeHead(400, ctxtype.JSON);
+    res.end('Wrong Password');
+  }
+  return (hash === await dbop.getHash());
 }
+
 var validate_hashcookie = async(res, req)=>{
   var cookies = requesthandler.getcookies(req);
   if(cookies.hash !== undefined){
     if(cookies.hash == await dbop.getHash()){return true;}
   }
 
-  var html = await filestream.readfile(appROOT + '/views/login.html');
-  res.writeHead(200, ctxtype.html);
-  res.end(html);
+  //var html = await filestream.readfile(appROOT + '/views/login.html');
+  res.writeHead(403, ctxtype.html);
+  res.end('Forbidden');
 }
 
 //router
@@ -107,8 +109,8 @@ var routing = async (req,res)=>{
     case '/login':
       var data = await requesthandler.getdata(req);
       if(await validate_hash(res, data)){
-        res.writeHead(200, ctxtype.JSON);  
-        res.end();
+        res.writeHead(200, ctxtype.JSON);
+        res.end();;
       }
       break;
 
@@ -116,7 +118,7 @@ var routing = async (req,res)=>{
     // paths below need permission granted with password
 
     case '/config':
-      if(!await validate_hashcookie(res, req)){break;};
+      if(!await validate_hashcookie(res, req)){break;}
       var data = await requesthandler.getdata(req);
       data = JSON.parse(data);
       var resdata;
@@ -201,7 +203,7 @@ var routing = async (req,res)=>{
     case '/menu.html':
     case '/config.html':
     case '/statistics.html':
-      if(!await validate_hashcookie(res, req)){break;*};
+      if(!await validate_hashcookie(res, req)){break;};
 
     default:
       var path = (appROOT+'/views'+req.url).replace('../','');

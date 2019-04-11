@@ -5,7 +5,7 @@ refresh_data(init);
 
 
 function refresh_data(callback){
-  $.getJSON('init', function(thisdata) {
+  $.getJSON('/init', function(thisdata) {
     //data is the JSON string
     window.data = thisdata;
 
@@ -116,7 +116,7 @@ function sortitem_switcher(checked){
 
 function sendAjax(config){
   $.ajax({
-      url: 'config',
+      url: '/config',
       type: 'POST',
       data: JSON.stringify(config.data),
       dataType: 'html',

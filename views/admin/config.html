@@ -1,24 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
-  <link rel="stylesheet" type="text/css" href="scripts/main.css">
-  <title>Kopitiam</title>
-</head>
-
-<body style="overflow: hidden">
+<script src="/include/jquery-ui-sortable.min.js"></script>
+<script src="/include/jquery.ui.touch-punch.min.js"></script> <!--http://touchpunch.furf.com/--!>
+<!--<script src="/include/vue.min.js"></script>-->
+<!--<script src="/include/semantic.min.js"></script>-->
+<script src="/include/tablesort.min.js"></script>
+<script src="/scripts/config.js"></script>
+<div style="overflow: hidden">
   <div id="menu" class="ui grid" style="margin-top:-1rem!important">
 
     <div class="four wide column">
       <div class="ui vertical fluid tabular menu">
-        <a onclick="vueForm.add_modal()" class="ui fluid big green button">
-          <i class="plus circle icon"></i>
-          Add Item 
-        </a>
+
+        <a onclick="history.back()" class="ui big basic button"><i class="arrow left icon"></i></a>
+        <a class="ui small header">Configuration</a>
+
         <a data-tab="itemmenu" class="item">Item Menu</a>
         <a data-tab="printer" class="item">Printers</a>
         <a data-tab="table" class="item">Tables</a>
@@ -30,6 +24,11 @@
             <label>Arrange</label>
           </div>
         </div>
+
+        <a onclick="vueForm.add_modal()" class="ui fluid big green button">
+          <i class="plus circle icon"></i>
+          Add Item 
+        </a>
       </div>
     </div>
     <div class="twelve wide stretched column">
@@ -276,13 +275,5 @@
     </div>
   </div>
 </div>
-<script src="include/jquery-3.3.1.min.js"></script>
-<script src="include/jquery.md5.min.js"></script>
-<script src="include/jquery-ui-sortable.min.js"></script>
-<script src="include/jquery.ui.touch-punch.min.js"></script> <!--http://touchpunch.furf.com/--!>
-<script src="include/vue.min.js"></script>
-<script src="include/semantic.min.js"></script>
-<script src="include/tablesort.min.js"></script>
-<script src="scripts/config.js"></script>
-</body>
-</html>
+
+</div>

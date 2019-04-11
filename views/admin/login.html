@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<div class="ui container" style="padding-top:20vh">
+<div class="ui centered fluid card" style="max-width:450px">
+    <div class="content">
+    <div class="ui form">
+      <div class="field">
+        <label>Password</label>
+        <input id="password_input" type="password" placeholder="Password">
+      </div>
+      <button class="ui primary labeled icon right floated button" onclick="login()">
+        <i class="unlock alternate icon"></i>
+        Login
+      </button>
+    </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function login(){
+  var hash = $.MD5($('#password_input').val());
+
+  $.ajax({
+    url: '/login', 
+    type: 'POST',
+    data: hash,
+    async: false,
+    success: function(data) {
+      document.cookie = "hash="+hash;
+      //load_serviceworker();
+      admin_app.load(admin_app.pages.menu);
+    },
+    error: function(data){
+      //delete cookie
+      document.cookie = 'hash' + '=; Max-Age=0'
+      alert(data.responseText);
+    }
+  });
+}
+
+//function load_serviceworker(){
+  // TODO add service worker code here
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/swadmin.js').then(function(registration) {
+        // Registration was successful
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      }, function(err) {
+        // registration failed :(
+        console.log('ServiceWorker registration failed: ', err);
+      });
+    });
+  }
+//}
+</script>

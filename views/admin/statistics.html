@@ -1,18 +1,20 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
-  <link rel="stylesheet" type="text/css" href="include/calendar.min.css">
-  <!-- <link rel="stylesheet" type="text/css" href="scripts/statistics.css"> --!>
-  <link rel="stylesheet" type="text/css" href="scripts/main.css">
-  <title>Kopitiam</title>
-</head>
 
-<body class="ui segment">
+<link rel="stylesheet" type="text/css" href="/include/calendar.min.css">
+  <!-- <link rel="stylesheet" type="text/css" href="scripts/statistics.css"> --!>
+
+<script src="/include/calendar.min.js"></script>
+<!--
+<script src="include/Chart.bundle.min.js"></script>
+<script src="include/hammer.min.js"></script>
+<script src="include/chartjs-plugin-zoom.min.js"></script>
+<script src="scripts/chartjs_rewrap.js"></script>
+!-->
+<script src="/scripts/statistics.js"></script>
+<div class="ui fixed menu">
+  <a onclick="history.back()" class="ui big basic button"><i class="arrow left icon"></i></a>
+  <a class="ui small header item">Statistics</a>
+</div>
+<div class="ui segment" style="margin-top:5rem">
 
 <div class="ui form">
   <div class="inline fields">
@@ -50,10 +52,9 @@
       <option class="item" data-value="Count">Quantity</option>
     </select>  
   </div>
-  <div onclick="loaddata()" class="ui button">Load</div>
+  <div onclick="statistics_app.loaddata()" class="ui button">Load</div>
 </div>
 
-</div>
 <div class="ui segment overflowhandler-x nopadding">
   <table id="data" class="ui celled table  ">
     <thead>
@@ -72,20 +73,6 @@
     </tbody>
   </table>
 </div>
-
-<script src="include/jquery-3.3.1.min.js"></script>
-<script src="include/vue.min.js"></script>
-<script src="include/semantic.min.js"></script>
-<script src="include/calendar.min.js"></script>
-<!--
-<script src="include/Chart.bundle.min.js"></script>
-<script src="include/hammer.min.js"></script>
-<script src="include/chartjs-plugin-zoom.min.js"></script>
-<script src="scripts/chartjs_rewrap.js"></script>
-!-->
-<script src="include/tablesort.min.js"></script>
-<script src="scripts/statistics.js"></script>
-</body>
-</html>
+</div>
 
 

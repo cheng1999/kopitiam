@@ -5,8 +5,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-  <link rel="stylesheet" type="text/css" href="include/semantic.min.css">
-  <link rel="stylesheet" type="text/css" href="scripts/main.css">
+  <link rel="stylesheet" type="text/css" href="/include/semantic.min.css">
+  <link rel="stylesheet" type="text/css" href="/scripts/main.css">
   <title>Kopitiam Menu</title>
   <style>
     .advmargin {
@@ -20,7 +20,7 @@
 
 <body class="ui basic segment container" style="height:100%">
   <h3 class="ui horizontal divider">Map</h3>
-    <a onclick="location.href='statistics.html'" class="ui icon label message">
+    <a onclick="admin_app.load(admin_app.pages.statistics)" class="ui icon label message">
       <i class="table icon"></i>
       <div class="content">
         <div class="header">
@@ -29,7 +29,7 @@
         <p>Summarize how much orders has made.</p>
       </div>
     </a>
-    <a onclick="location.href='config.html'" class="ui icon label message">
+    <a onclick="admin_app.load(admin_app.pages.config)" class="ui icon label message">
       <i class="cog icon"></i>
       <div class="content">
         <div class="header">
@@ -38,7 +38,7 @@
         <p>Configuration about menu items, table number, printers and etc.</p>
       </div>
     </a>
-    <a onclick="location.href='index.html'" class="ui icon label message">
+    <a onclick="location.href='/index.html'" class="ui icon label message">
       <i class="edit icon"></i>
       <div class="content">
         <div class="header">
@@ -51,7 +51,7 @@
   <div class="ui grid container" style="padding-bottom:5em">
       <a onclick="load('update')" class="ui fluid big button advmargin">Update Version</a>
       <div class="eight wide column advcolumn">
-        <a onclick="location.href='backupdb.zip'" class="ui fluid big button">Backup Database</a>
+        <a onclick="location.href='/backupdb.zip'" class="ui fluid big button">Backup Database</a>
       </div>
       <form id="restoredb_form" class="eight wide column advcolumn">
           <label for="file" class="ui fluid big icon button">
@@ -59,19 +59,18 @@
               Retore Database</label>
           <input type="file" id="file" style="display:none" onchange="restoredb()" >
       </form>
-      <a onclick="load('restart')" class="ui fluid big button advmargin">Restart System</a>
-      <a onclick="document.cookie = 'hash=; Max-Age=0'; location.reload()" class="ui fluid big button advmargin">Logout</a>
+      <a onclick="load('/restart')" class="ui fluid big button advmargin">Restart System</a>
+      <a onclick="document.cookie = 'hash=; Max-Age=0'; admin_app.load(admin_app.pages.login)" class="ui fluid big button advmargin">Logout</a>
   </div>
 </body>
 
 
-<script src="include/jquery-3.3.1.min.js"></script>
 <script>
 function restoredb(){
   var dbdata = new FormData();
   dbdata.append('uploadfile',$('#restoredb,input[type=file]')[0].files[0]);
   $.ajax({
-    url: 'restoredb',
+    url: '/restoredb',
     type: 'POST',
     data : dbdata,
     success: function(data){
@@ -90,17 +89,5 @@ function load(target){
   });
 }
 
-  // TODO add service worker code here
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/swadmin.js').then(function(registration) {
-        // Registration was successful
-        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-      }, function(err) {
-        // registration failed :(
-        console.log('ServiceWorker registration failed: ', err);
-      });
-    });
-  }
 </script>
 </html>
